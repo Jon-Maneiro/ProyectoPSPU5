@@ -1,0 +1,9 @@
+Utilizar archivos para guardar la info, o en su defecto SQLite.
+
+Para gestionar el acceso a los datos utilizar Semaforos o monitores:
+	En caso de ser un archivo, parar la ejecucion a la hora de intentar abrir ese archivo(Cerrar archivo despues de cada operacion para permitir concurrencia?¿)
+
+	En caso de ser una BBDD, asumo que puede haber dos conexiones simultaneas, creando usuarios de acceso. Aun asi, si se intenta cambiar la misma tabla a la vez
+	debería de dar error, si no lo da pues mejor, pero si no, habría que controlar eso tambien.
+
+	con archivos me puedo poner a trabajar más rapido y cuesta menos trabajo una vez lo organice todo. Con BBDD una vez este funcionando, poco mantenimiento tendré que darle
