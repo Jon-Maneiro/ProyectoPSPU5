@@ -51,6 +51,48 @@ public class HiloServidor extends Thread {
             String textoCliente ="";
             while(!textoCliente.equalsIgnoreCase("Salir")){
                 oos.writeObject(textoMenuPrincipal());
+                String operacion = ois.readObject().toString();
+                switch(Integer.parseInt(operacion)){
+                    case 1:
+                        boolean correcto = false;
+                        while(!correcto){//Hacer la logica jaja
+                            byte[] cuentaCifrada =(byte[]) ois.readObject();
+                            System.out.println(cuentaCifrada);
+                            String cuenta = descifrarMensaje("RSA",cuentaCifrada.toString(),pvkServidor);
+                            //Comprobacion de que la cuenta cifrada sea la correcta
+                            System.out.println(cuenta);
+                            //PAPAPAPAPAPAPA
+                            oos.writeBoolean(true);//JAJAAAA
+                            //PAPAPAPAPAPAPA
+                            //Recogemos el saldo de esa cuenta y se lo enviamos de vuelta
+                            double saldo = 10000.00;
+                            oos.writeDouble(saldo);
+                        }
+                        break;
+                    case 2:
+                        boolean correcto2 = false;
+                        while(!correcto2) {//Hacer la logica jeje
+                            String cuentaPropiaC = ois.readObject().toString();
+                            String cuentaPropia = descifrarMensaje("RSA", cuentaPropiaC, pvkServidor);
+
+                            //Comprobacion de que la cuenta es correcta
+                            oos.writeBoolean(true);
+                            //Cuenta Ajena
+                            String cuentaAjenaC = ois.readObject().toString();
+                            String cuentaAjena = descifrarMensaje("RSA" , cuentaAjenaC, pvkServidor);
+                            //Comprobacion de que la cuenta existe
+                            oos.writeBoolean(true);
+
+                            //Nos llega el dinero
+                            double dinero = ois.readDouble();
+
+                            //Comprobamos bien todo
+                            oos.writeBoolean(true);
+
+
+                        }
+                        break;
+                }
             }
             /*
             Termina logica de operaciones
@@ -60,6 +102,21 @@ public class HiloServidor extends Thread {
             Logger.getLogger(HiloServidor.class.getName()).log(Level.SEVERE, null, e);
             throw new RuntimeException(e);
         } catch (ClassNotFoundException e) {
+            Logger.getLogger(HiloServidor.class.getName()).log(Level.SEVERE, null, e);
+            throw new RuntimeException(e);
+        } catch (NoSuchPaddingException e) {
+            Logger.getLogger(HiloServidor.class.getName()).log(Level.SEVERE, null, e);
+            throw new RuntimeException(e);
+        } catch (IllegalBlockSizeException e) {
+            Logger.getLogger(HiloServidor.class.getName()).log(Level.SEVERE, null, e);
+            throw new RuntimeException(e);
+        } catch (NoSuchAlgorithmException e) {
+            Logger.getLogger(HiloServidor.class.getName()).log(Level.SEVERE, null, e);
+            throw new RuntimeException(e);
+        } catch (BadPaddingException e) {
+            Logger.getLogger(HiloServidor.class.getName()).log(Level.SEVERE, null, e);
+            throw new RuntimeException(e);
+        } catch (InvalidKeyException e) {
             Logger.getLogger(HiloServidor.class.getName()).log(Level.SEVERE, null, e);
             throw new RuntimeException(e);
         }
@@ -110,7 +167,8 @@ public class HiloServidor extends Thread {
     public static String textoMenuPrincipal(){
         return "Bienvenido, que deseas hacer?:\n" +
                 "(1) - Ver Saldo\n" +
-                "(2) - Hacer Transferencia";
+                "(2) - Hacer Transferencia\n" +
+                "Escribe \"Salir\" para salir";
     }
     private static String obtenerStringCompleto(String texto, int longitud) {
         String modif = texto;

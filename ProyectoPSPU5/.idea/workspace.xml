@@ -44,7 +44,7 @@
       <updated>1669235546067</updated>
       <workItem from="1669235547364" duration="875000" />
       <workItem from="1669750211208" duration="3535000" />
-      <workItem from="1669829820388" duration="4960000" />
+      <workItem from="1669829820388" duration="10126000" />
     </task>
     <servers />
   </component>
@@ -61,5 +61,21 @@
         </entry>
       </map>
     </option>
+  </component>
+  <component name="XDebuggerManager">
+    <breakpoint-manager>
+      <breakpoints>
+        <line-breakpoint enabled="true" type="java-line">
+          <url>file://$PROJECT_DIR$/src/Cliente.java</url>
+          <line>71</line>
+          <option name="timeStamp" value="2" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="java-line">
+          <url>file://$PROJECT_DIR$/src/HiloServidor.java</url>
+          <line>57</line>
+          <option name="timeStamp" value="3" />
+        </line-breakpoint>
+      </breakpoints>
+    </breakpoint-manager>
   </component>
 </project>

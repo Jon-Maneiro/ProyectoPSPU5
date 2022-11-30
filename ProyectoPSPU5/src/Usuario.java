@@ -8,6 +8,8 @@ public class Usuario implements Serializable {
     private String usuario;// 20char
     private String contrasenna;//La contraseña se guarda hasheada, 20Bytes
 
+    private int numCuenta;//4Bytes
+
     private boolean normasAceptadas;
 /*
     Nombre 50 chars - 100Bytes
@@ -16,18 +18,20 @@ public class Usuario implements Serializable {
     email 50chars - 100Bytes
     usuario 20 chars - 40Bytes
     contrasenna 20Bytes
+    numCuenta int 4Bytes
 
-    Total = 364Bytes
+    Total = 368Bytes
 
  */
 
-    public Usuario(String nombre, String apellido, int edad, String email, String usuario, String contrasenna, boolean normasAceptadas) {
+    public Usuario(String nombre, String apellido, int edad, String email, String usuario, String contrasenna, int numCuenta, boolean normasAceptadas) {
         this.nombre = nombre;
         this.apellido = apellido;
         this.edad = edad;
         this.email = email;
         this.usuario = usuario;
         this.contrasenna = contrasenna;
+        this.numCuenta = numCuenta;
         this.normasAceptadas = normasAceptadas;
     }
 
@@ -85,5 +89,13 @@ public class Usuario implements Serializable {
 
     public void setNormasAceptadas(boolean normasAceptadas) {
         this.normasAceptadas = normasAceptadas;
+    }
+
+    public int getNumCuenta() {
+        return numCuenta;
+    }
+
+    public void setNumCuenta(int numCuenta) {
+        this.numCuenta = numCuenta;
     }
 }
