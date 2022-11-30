@@ -1,12 +1,10 @@
-import javax.crypto.BadPaddingException;
-import javax.crypto.Cipher;
-import javax.crypto.IllegalBlockSizeException;
-import javax.crypto.NoSuchPaddingException;
+import javax.crypto.*;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
 import java.security.*;
+import java.util.Scanner;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -22,32 +20,66 @@ public class Cliente {
     public static void main(String[] args) {
         //Conectar con el servidor
         Socket socket;
+        ObjectOutputStream oos;
+        ObjectInputStream ois;
+        PublicKey pkCliente;
+        PublicKey pkServidor;
+        PrivateKey pvkCliente;
+
         try {
             socket = new Socket("localhost", puerto);
 
 
-            ObjectOutputStream oos;
-            ObjectInputStream ois;
+
 
             oos = new ObjectOutputStream(socket.getOutputStream());
             ois = new ObjectInputStream(socket.getInputStream());
 
-            PublicKey pks;
-
-            pks = (PublicKey) ois.readObject();
-
-
-            System.out.println(pks);
             //Habria que enviar la clave publica del cliente, y/o utilizar una clave simetrica
             //Falta la logica de preguntas/respuestas
             KeyPair kp;
 
             kp = generarClaves();
 
-            PublicKey pkc = kp.getPublic();
-            PrivateKey pvc = kp.getPrivate();
+             pkCliente = kp.getPublic();
+             pvkCliente = kp.getPrivate();
 
-            oos.writeObject(pkc);
+            oos.writeObject(pkCliente);
+
+            pkServidor = (PublicKey) ois.readObject();
+
+
+            /*
+            Logica de Inicio de Sesion
+             */
+            //------------------------------------
+            /*
+            Fin de Inicio de Sesion
+             */
+
+            /*
+            Logica de operaciones
+             */
+            String textoServidor = "";
+            Scanner sc = new Scanner(System.in);
+            String respuesta = "";
+            while(!textoServidor.equalsIgnoreCase("desconexion")){
+                System.out.println(ois.readObject());
+                respuesta = sc.nextLine();
+                if(isInt(respuesta) && (Integer.parseInt(respuesta) >= 1 && Integer.parseInt(respuesta)<= 2 )){
+                    String conv = ois.readObject().toString();
+                    while(!conv.equalsIgnoreCase("volver")){
+
+                    }
+                }else{
+                    System.out.println("Parece que lo que hayas introducido no es valido");
+                }
+
+            }
+            /*
+            Fin de Logica de Operaciones
+             */
+
         } catch (IOException e) {
             Logger.getLogger(HiloServidor.class.getName()).log(Level.SEVERE, null, e);
             throw new RuntimeException(e);
@@ -55,7 +87,6 @@ public class Cliente {
             Logger.getLogger(HiloServidor.class.getName()).log(Level.SEVERE, null, e);
             throw new RuntimeException(e);
         }
-
 
 
     }
@@ -86,6 +117,26 @@ public class Cliente {
         byte[] msgCF = cp.doFinal(mensaje.getBytes());
 
         return msgCF;
+    }
+    private static String obtenerStringCompleto(String texto, int longitud) {
+        String modif = texto;
+        if (modif.length() < longitud) {
+            while (modif.length() < longitud) {
+                modif = modif + " ";
+            }
+        } else if (modif.length() > longitud) {
+            modif = modif.substring(0, (longitud - 1));
+        }
+
+        return modif;
+    }
+    public static boolean isInt(String check){
+        try{
+            Integer.parseInt(check);
+            return true;
+        }catch(NumberFormatException e){
+            return false;
+        }
     }
 
 }
