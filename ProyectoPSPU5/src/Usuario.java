@@ -6,9 +6,9 @@ public class Usuario implements Serializable {
     private int edad;
     private String email;//Validar con expresiones regulares //  50 chars
     private String usuario;// 20char
-    private String contrasenna;//La contraseña se guarda hasheada, 20Bytes
+    private byte[] contrasenna;//La contraseña se guarda hasheada, 20Bytes
 
-    private int numCuenta;//4Bytes
+    private int numCuenta;//4Bytes//20 Digitos
 
     private boolean normasAceptadas;
 /*
@@ -24,7 +24,7 @@ public class Usuario implements Serializable {
 
  */
 
-    public Usuario(String nombre, String apellido, int edad, String email, String usuario, String contrasenna, int numCuenta, boolean normasAceptadas) {
+    public Usuario(String nombre, String apellido, int edad, String email, String usuario, byte[] contrasenna, int numCuenta, boolean normasAceptadas) {
         this.nombre = nombre;
         this.apellido = apellido;
         this.edad = edad;
@@ -75,11 +75,11 @@ public class Usuario implements Serializable {
         this.usuario = usuario;
     }
 
-    public String getContrasenna() {
+    public byte[] getContrasenna() {
         return contrasenna;
     }
 
-    public void setContrasenna(String contrasenna) {
+    public void setContrasenna(byte[] contrasenna) {
         this.contrasenna = contrasenna;
     }
 

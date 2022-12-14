@@ -50,7 +50,9 @@ public class Cliente {
             /*
             Logica de Inicio de Sesion
              */
-            //------------------------------------
+
+
+
             /*
             Fin de Inicio de Sesion
              */
@@ -71,12 +73,13 @@ public class Cliente {
                             boolean correcto = false;
                             while(!correcto) {
                                 String numCuenta = getCuenta(false);
-                                oos.writeBytes(cifrarMensaje("RSA",numCuenta,pkServidor).toString());//Esto tiene que ir cifrado
+                                oos.writeObject(cifrarMensaje("RSA",numCuenta,pkServidor));//Esto tiene que ir cifrado
                                 boolean ok = ois.readBoolean();
                                 System.out.println(ok);
                                 if(!ok){
                                     System.out.println("Ese numero de cuenta no te corresponde");
                                 }else{
+                                    System.out.println("funciona");
                                     correcto = true;
                                 }
                             }
@@ -232,19 +235,6 @@ public class Cliente {
         byte[] msgCF = cp.doFinal(mensaje.getBytes());
 
         return msgCF;
-    }
-
-    private static String obtenerStringCompleto(String texto, int longitud) {
-        String modif = texto;
-        if (modif.length() < longitud) {
-            while (modif.length() < longitud) {
-                modif = modif + " ";
-            }
-        } else if (modif.length() > longitud) {
-            modif = modif.substring(0, (longitud - 1));
-        }
-
-        return modif;
     }
 
     public static boolean isInt(String check) {

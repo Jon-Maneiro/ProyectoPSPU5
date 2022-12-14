@@ -56,29 +56,35 @@ public class HiloServidor extends Thread {
                     case 1:
                         boolean correcto = false;
                         while(!correcto){//Hacer la logica jaja
-                            byte[] cuentaCifrada =(byte[]) ois.readObject();
+                            System.out.println("hola");
+                            byte[] cuentaCifrada =(byte[])ois.readObject();
                             System.out.println(cuentaCifrada);
-                            String cuenta = descifrarMensaje("RSA",cuentaCifrada.toString(),pvkServidor);
+                            String cuenta = descifrarMensaje("RSA",cuentaCifrada,pvkServidor);
                             //Comprobacion de que la cuenta cifrada sea la correcta
                             System.out.println(cuenta);
-                            //PAPAPAPAPAPAPA
-                            oos.writeBoolean(true);//JAJAAAA
-                            //PAPAPAPAPAPAPA
+                            if(true) {//Comprobar que la cuenta exista
+
+                                correcto = true;
+                            }else{
+                                oos.writeBoolean(true);
+                            }
+
+
                             //Recogemos el saldo de esa cuenta y se lo enviamos de vuelta
-                            double saldo = 10000.00;
+                            double saldo = 10000.00;//Dato de prueba
                             oos.writeDouble(saldo);
                         }
                         break;
                     case 2:
                         boolean correcto2 = false;
                         while(!correcto2) {//Hacer la logica jeje
-                            String cuentaPropiaC = ois.readObject().toString();
+                            byte[] cuentaPropiaC = (byte[]) ois.readObject();
                             String cuentaPropia = descifrarMensaje("RSA", cuentaPropiaC, pvkServidor);
 
                             //Comprobacion de que la cuenta es correcta
                             oos.writeBoolean(true);
                             //Cuenta Ajena
-                            String cuentaAjenaC = ois.readObject().toString();
+                            byte[] cuentaAjenaC = (byte[]) ois.readObject();
                             String cuentaAjena = descifrarMensaje("RSA" , cuentaAjenaC, pvkServidor);
                             //Comprobacion de que la cuenta existe
                             oos.writeBoolean(true);
@@ -86,7 +92,7 @@ public class HiloServidor extends Thread {
                             //Nos llega el dinero
                             double dinero = ois.readDouble();
 
-                            //Comprobamos bien todo
+                            //Comprobamos bien todito
                             oos.writeBoolean(true);
 
 
@@ -148,10 +154,10 @@ public class HiloServidor extends Thread {
         return sk;
     }
 
-    public static String descifrarMensaje(String algoritmo, String mensaje, Key key) throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException {
+    public static String descifrarMensaje(String algoritmo, byte[] mensaje, Key key) throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException {
         Cipher cp = Cipher.getInstance(algoritmo);
         cp.init(Cipher.DECRYPT_MODE, key);
-        String msgDes = new String(cp.doFinal(mensaje.getBytes()));
+        String msgDes = new String(cp.doFinal(mensaje));
 
         return msgDes;
     }
@@ -170,25 +176,6 @@ public class HiloServidor extends Thread {
                 "(2) - Hacer Transferencia\n" +
                 "Escribe \"Salir\" para salir";
     }
-    private static String obtenerStringCompleto(String texto, int longitud) {
-        String modif = texto;
-        if (modif.length() < longitud) {
-            while (modif.length() < longitud) {
-                modif = modif + " ";
-            }
-        } else if (modif.length() > longitud) {
-            modif = modif.substring(0, (longitud - 1));
-        }
 
-        return modif;
-    }
-    public static boolean isInt(String check){
-        try{
-            Integer.parseInt(check);
-            return true;
-        }catch(NumberFormatException e){
-            return false;
-        }
-    }
 
 }
