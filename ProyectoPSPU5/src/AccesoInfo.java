@@ -191,8 +191,8 @@ public class AccesoInfo {
      * @return true/false
      */
     public static boolean cuentaExiste(String numCuenta){
-        String cuenta = "Cuenta"+numCuenta;
-        File file = new File("/cuentas/"+cuenta);
+        String cuenta = "/cuentas/Cuenta"+numCuenta+".dat";
+        File file = new File(cuenta);
         if(file.exists()){
             return true;
         }else{
@@ -207,8 +207,8 @@ public class AccesoInfo {
      * @throws IOException
      */
     public static double obtenerSaldoCuenta(String numCuenta) throws IOException {
-        String cuenta = "Cuenta"+numCuenta;
-        File file = new File("/cuentas/"+cuenta);
+        String cuenta = "/cuentas/Cuenta"+numCuenta+".dat";
+        File file = new File(cuenta);
         RandomAccessFile fichero = new RandomAccessFile(file,"r");
 
         double saldo = 0;
@@ -231,8 +231,8 @@ public class AccesoInfo {
      * @throws IOException
      */
     public static void cambiarValorCuenta(String numCuenta , double valor) throws IOException {
-        String cuenta = "Cuenta"+numCuenta;
-        File file = new File("/cuentas/"+cuenta);
+        String cuenta = "/cuentas/Cuenta"+numCuenta+".dat";
+        File file = new File(cuenta);
         RandomAccessFile fichero = new RandomAccessFile(file,"rw");
 
         double saldoActual = 0;
