@@ -51,7 +51,16 @@ public class Cliente {
             Logica de Inicio de Sesion
              */
 
+            System.out.println("Bienvenido, dispones de una cuenta?(Y/N) en caso negativo, pasaremos al registro");
+            boolean cuentaExiste = AccesoInfo.yesNo();
+            if(cuentaExiste){
 
+            }else{
+
+
+
+                //ademas del registro, tiene que aceptar unas credenciales firmadas por el servidor
+            }
 
             /*
             Fin de Inicio de Sesion
@@ -112,7 +121,7 @@ public class Cliente {
                                     correcto3 = true;
                                 }
                             }
-                            boolean correcto4 = false;
+                            boolean correcto4 = false;//Cuantas variables iguales voy a crear? no lo se, soy un dios generoso.
                             while(!correcto4){//Pedimos dinero
                                 double dinero = cantidadDinero();
                                 oos.writeDouble(dinero);
@@ -168,6 +177,10 @@ public class Cliente {
 
     }
 
+    /**
+     * Pide por pantalla una cantidad de dinero, para cuando toque hacer transferencias
+     * @return El dato insertado por pantalla
+     */
     public static double cantidadDinero(){
         double dinero = 0;
         Scanner sc = new Scanner(System.in);
@@ -186,6 +199,12 @@ public class Cliente {
 
         return dinero;
     }
+
+    /**
+     * Devuelve un numero de cuenta en formato String
+     * @param alter False - Cuenta propia, True - Cuenta Ajena. Unicamente relevante por el mensaje que se muestra al usuario
+     * @return un String con el numero de cuenta
+     */
     public static String getCuenta(boolean alter) {
         Scanner sc = new Scanner(System.in);
         String numCuenta = "";
@@ -206,6 +225,10 @@ public class Cliente {
         return numCuenta;
     }
 
+    /**
+     * Genera un par de claves
+     * @return el par de claves
+     */
     public static KeyPair generarClaves() {
         KeyPairGenerator keygen;
         try {
@@ -219,6 +242,19 @@ public class Cliente {
         return par;
     }
 
+    /**
+     * Descifra un mensaje suministrado, Tambien requiere de algoritmo y clave. Asegurarse de utilizar los datos correctos,
+     * es decir, el algorimo con el que se Cifró, y la clave correspondiente
+     * @param algoritmo el algoritmo con el que se quiere descifrar el texto, debe ser el mismo que el de cifrado
+     * @param mensaje el mensaje a descifrar
+     * @param key la clave que se usará para descifrar.
+     * @return
+     * @throws NoSuchPaddingException
+     * @throws NoSuchAlgorithmException
+     * @throws InvalidKeyException
+     * @throws IllegalBlockSizeException
+     * @throws BadPaddingException
+     */
     public static String descifrarMensaje(String algoritmo, String mensaje, Key key) throws
             NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException {
         Cipher cp = Cipher.getInstance(algoritmo);
@@ -228,6 +264,18 @@ public class Cliente {
         return msgDes;
     }
 
+    /**
+     * Cifra el mensaje proporcionado, Tambien requiere de algoritmo y clave. El algoritmo utilizado aqui, debe ser el mismo que para descifrar
+     * @param algoritmo el algoritmo con el que se quiere cifrar el texto
+     * @param mensaje mensaje a cifrar
+     * @param key la clave con la que se quiere firmar
+     * @return
+     * @throws NoSuchPaddingException
+     * @throws NoSuchAlgorithmException
+     * @throws InvalidKeyException
+     * @throws IllegalBlockSizeException
+     * @throws BadPaddingException
+     */
     public static byte[] cifrarMensaje(String algoritmo, String mensaje, Key key) throws
             NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException {
         Cipher cp = Cipher.getInstance(algoritmo);
@@ -253,6 +301,12 @@ public class Cliente {
             return false;
         }
     }
+
+    /**
+     * Formatea correctamente un Double desde un String la mayor parte de los casos. Hay algunas ocurrencias que no puede controlar y los datos devueltos serán ambiguos
+     * @param input String que se quiere formatear a double
+     * @return un double con la correcta puntuacion
+     */
     public static double convert(String input) {
         input = input.replace(',', '.');
         int decimalSeperator = input.lastIndexOf('.');

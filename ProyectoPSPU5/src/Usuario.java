@@ -10,7 +10,6 @@ public class Usuario implements Serializable {
 
     private int numCuenta;//4Bytes//20 Digitos
 
-    private boolean normasAceptadas;
 /*
     Nombre 50 chars - 100Bytes
     Apellido 50 chars - 100Bytes
@@ -24,7 +23,17 @@ public class Usuario implements Serializable {
 
  */
 
-    public Usuario(String nombre, String apellido, int edad, String email, String usuario, byte[] contrasenna, int numCuenta, boolean normasAceptadas) {
+    /**
+     * Constructor de la clase usuario
+     * @param nombre
+     * @param apellido
+     * @param edad
+     * @param email
+     * @param usuario
+     * @param contrasenna
+     * @param numCuenta
+     */
+    public Usuario(String nombre, String apellido, int edad, String email, String usuario, byte[] contrasenna, int numCuenta) {
         this.nombre = nombre;
         this.apellido = apellido;
         this.edad = edad;
@@ -32,8 +41,12 @@ public class Usuario implements Serializable {
         this.usuario = usuario;
         this.contrasenna = contrasenna;
         this.numCuenta = numCuenta;
-        this.normasAceptadas = normasAceptadas;
     }
+
+    /**
+     * Constructor vacio
+     */
+    public Usuario(){};
 
     public String getNombre() {
         return nombre;
@@ -81,14 +94,6 @@ public class Usuario implements Serializable {
 
     public void setContrasenna(byte[] contrasenna) {
         this.contrasenna = contrasenna;
-    }
-
-    public boolean isNormasAceptadas() {
-        return normasAceptadas;
-    }
-
-    public void setNormasAceptadas(boolean normasAceptadas) {
-        this.normasAceptadas = normasAceptadas;
     }
 
     public int getNumCuenta() {

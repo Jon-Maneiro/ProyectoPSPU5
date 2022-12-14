@@ -253,12 +253,88 @@ public class AccesoInfo {
         fichero.close();
     }
 
-    public static void insertarUsuario(Usuario user){
+    /**
+     * Inserta un usuario en el archivo.dat de Usuarios
+     * @param user el objeto Usuario que se desea insertar
+     * @throws IOException
+     */
+    public static void insertarUsuario(Usuario user) throws IOException {
+        File file = new File("Usuarios.dat");
+        RandomAccessFile fichero = new RandomAccessFile(file,"rw");
+
+        /*
+        Nombre 50 chars - 100Bytes
+        Apellido 50 chars - 100Bytes
+        edad int - 4Bytes
+        email 50chars - 100Bytes
+        usuario 20 chars - 40Bytes
+        contrasenna 20Bytes
+        numCuenta int 4Bytes
+
+        Total = 368Bytes
+       */
+
+        long longitud = fichero.length();
+        fichero.seek(longitud);
+
+        fichero.writeChars(obtenerStringCompleto(user.getNombre(),50));
+        fichero.writeChars(obtenerStringCompleto(user.getApellido(),50));
+        fichero.writeInt(user.getEdad());
+        fichero.writeChars(obtenerStringCompleto(user.getUsuario(),20));
+        fichero.write(user.getContrasenna());
+        fichero.writeInt(user.getNumCuenta());
+
+        fichero.close();
 
     }
 
-    public static void checkUsuario(String user, byte[] pass){
+    /**
+     * Comprueba la existencia de un Usuario en el archivo.dat, y que las contraseñas coincidan
+     * @param user
+     * @param pass
+     * @return
+     */
+    public static boolean checkUsuario(String user, byte[] pass) throws IOException {
+        /*
+        Nombre 50 chars - 100Bytes
+        Apellido 50 chars - 100Bytes
+        edad int - 4Bytes
+        email 50chars - 100Bytes
+        usuario 20 chars - 40Bytes
+        contrasenna 20Bytes
+        numCuenta int 4Bytes
 
+        Total = 368Bytes
+       */
+        char[] usuario = new char[20];
+        byte[] contrasenna = new byte[20];
+        boolean existe = false;
+
+        File file = new File("Usuarios.dat");
+        RandomAccessFile fichero = new RandomAccessFile(file,"rw");
+        long longitud = fichero.length();
+        fichero.seek(0);
+
+        boolean correcto = false;
+        while(fichero.getFilePointer()<longitud && !correcto){
+            fichero.seek(fichero.getFilePointer()+304);
+            for(int x = 0; x < 20; x++){
+                usuario[x] = fichero.readChar();
+            }
+            for(int y = 0; y<20;y++){
+                contrasenna[y] = fichero.readByte();
+            }
+            fichero.readInt();
+            if(new String(usuario).equals(user) && contrasenna.equals(pass)){
+                correcto = true;
+                existe = true;
+            }else{
+                System.out.println("Los datos son incorrectos");
+            }
+        }
+
+
+        return existe;
     }
 
 }
