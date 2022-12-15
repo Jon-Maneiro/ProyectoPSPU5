@@ -54,7 +54,7 @@ public class Cliente {
             System.out.println("Bienvenido, dispones de una cuenta?(Y/N) en caso negativo, pasaremos al registro");
             boolean cuentaExiste = AccesoInfo.yesNo();
             if(cuentaExiste){
-
+                AccesoInfo.iniciarSesion();
             }else{
 
 

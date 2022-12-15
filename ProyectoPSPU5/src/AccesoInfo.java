@@ -8,6 +8,7 @@ import java.util.regex.Pattern;
 public class AccesoInfo {
 
     private static final String algoritmo = "SHA-256";//Algoritmo de hasheo
+    private static final String ENCODING_TYPE="UTF-8";
 /**
  * Tanto funciones genericas como funciones de acceso a los datos
  * Gestionar aqui tema ficheros y como organizarlo para no permitir a más de un usuario acceder al mismo fichero
@@ -143,11 +144,10 @@ public class AccesoInfo {
      * @param mensaje mensaje que se quiera mostrar al usuario
      * @return dato introducido por pantalla resumido/hasheado
      */
-    public static byte[] pedirDatoYHashear(String mensaje){
+    public static byte[] pedirDatoYHashear(String mensaje) throws UnsupportedEncodingException, NoSuchAlgorithmException {
         Scanner sc = new Scanner(System.in);
         System.out.println(mensaje);
-        byte[] valor = {};//= getDigest();
-
+        byte[] valor = getDigest(sc.nextLine().getBytes(ENCODING_TYPE));
         return valor;
     }
 
@@ -294,7 +294,7 @@ public class AccesoInfo {
      * @param pass
      * @return
      */
-    public static boolean checkUsuario(String user, byte[] pass) throws IOException {
+    public static boolean checkUsuario(String user, byte[] pass) throws IOException, NoSuchAlgorithmException {
         /*
         Nombre 50 chars - 100Bytes
         Apellido 50 chars - 100Bytes
@@ -325,7 +325,7 @@ public class AccesoInfo {
                 contrasenna[y] = fichero.readByte();
             }
             fichero.readInt();
-            if(new String(usuario).equals(user) && contrasenna.equals(pass)){
+            if(new String(usuario).equals(user) && compararHash(contrasenna,pass)){
                 correcto = true;
                 existe = true;
             }else{
@@ -337,4 +337,16 @@ public class AccesoInfo {
         return existe;
     }
 
+    public static boolean iniciarSesion() throws IOException, NoSuchAlgorithmException {
+        System.out.println("Por favor, introduce los datos requeridos para el inicio de sesion.");
+        Scanner sc = new Scanner(System.in);
+        System.out.println("Introduce el nombre de usuario que te corresponde");
+        String user = sc.nextLine();
+        byte[] pass = pedirDatoYHashear("Introduce tu contraseña");
+        if(checkUsuario(user,pass)){
+            return true;
+        }else{
+            return false;
+        }
+    }
 }
