@@ -1,6 +1,7 @@
 import java.io.*;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.Random;
 import java.util.Scanner;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -22,7 +23,7 @@ public class AccesoInfo {
      * @param longitud la longitud deseada
      * @return texto con longitud deseada
      */
-    private static String obtenerStringCompleto(String texto, int longitud) {
+    public static String obtenerStringCompleto(String texto, int longitud) {
         String modif = texto;
         if (modif.length() < longitud) {
             while (modif.length() < longitud) {
@@ -103,6 +104,26 @@ public class AccesoInfo {
             String temp = sc.nextLine();
             if(isInt(temp)){
                 valor = Integer.parseInt(temp);
+                correcto = true;
+            }else{
+                System.out.println("Parece que lo que has introducido no es un valor correcto," +
+                        "\n por favor, introduce un valor valido");
+            }
+        }
+
+        return valor;
+
+    }
+
+    public static double pedirDouble(String mensaje){
+        System.out.println(mensaje);
+        Scanner sc = new Scanner(System.in);
+        double valor = 0;
+        boolean correcto = false;
+        while(!correcto){
+            String temp = sc.nextLine();
+            if(isInt(temp)){
+                valor = Double.parseDouble(temp);
                 correcto = true;
             }else{
                 System.out.println("Parece que lo que has introducido no es un valor correcto," +
@@ -198,6 +219,15 @@ public class AccesoInfo {
         }else{
             return false;
         }
+    }
+
+    public static void crearCuenta(int numCuenta, double saldoInicial) throws IOException {
+        String cuenta = "/cuentas/Cuenta"+numCuenta+".dat";
+        File file = new File(cuenta);
+        RandomAccessFile fichero = new RandomAccessFile(file,"rw");
+        fichero.seek(0);
+        fichero.writeDouble(saldoInicial);
+        fichero.close();
     }
 
     /**
@@ -337,16 +367,6 @@ public class AccesoInfo {
         return existe;
     }
 
-    public static boolean iniciarSesion() throws IOException, NoSuchAlgorithmException {
-        System.out.println("Por favor, introduce los datos requeridos para el inicio de sesion.");
-        Scanner sc = new Scanner(System.in);
-        System.out.println("Introduce el nombre de usuario que te corresponde");
-        String user = sc.nextLine();
-        byte[] pass = pedirDatoYHashear("Introduce tu contraseña");
-        if(checkUsuario(user,pass)){
-            return true;
-        }else{
-            return false;
-        }
-    }
+
+
 }

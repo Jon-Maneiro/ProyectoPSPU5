@@ -41,6 +41,24 @@ public class HiloServidor extends Thread {
             Empieza la logica de Iniciar Sesion
              */
             //-------------------------------------
+            boolean cuentaExiste = (boolean)ois.readObject();
+            if(cuentaExiste){
+                boolean correcto = false;
+                while(!correcto) {
+                    String user = (String) ois.readObject();
+                    byte[] pass = (byte[]) ois.readObject();
+                    boolean x = AccesoInfo.checkUsuario(user, pass);
+                    correcto = x;
+                    oos.writeObject(x);
+                }
+            }else{
+                Usuario user = (Usuario)ois.readObject();
+                //Aqui hay que hacer la aceptacion del certificado
+                AccesoInfo.insertarUsuario(user);
+                double saldoInicial = ois.readDouble();
+                AccesoInfo.crearCuenta(user.getNumCuenta(),10000);
+            }
+
             /*
             Se termina el Inicio de Sesion
              */
@@ -55,25 +73,26 @@ public class HiloServidor extends Thread {
                 switch(Integer.parseInt(operacion)){
                     case 1:
                         boolean correcto = false;
+                        String cuenta = "";
                         while(!correcto){//Hacer la logica jaja
                             System.out.println("hola");
                             byte[] cuentaCifrada =(byte[])ois.readObject();
                             System.out.println(cuentaCifrada);
-                            String cuenta = descifrarMensaje("RSA",cuentaCifrada,pvkServidor);
+                            cuenta = descifrarMensaje("RSA",cuentaCifrada,pvkServidor);
                             //Comprobacion de que la cuenta cifrada sea la correcta
                             System.out.println(cuenta);
-                            if(true) {//Comprobar que la cuenta exista
-
+                            if(AccesoInfo.cuentaExiste(cuenta)) {//Comprobar que la cuenta exista
                                 correcto = true;
-                            }else{
                                 oos.writeBoolean(true);
+                            }else{
+                                oos.writeBoolean(false);
                             }
-
-
-                            //Recogemos el saldo de esa cuenta y se lo enviamos de vuelta
-                            double saldo = 10000.00;//Dato de prueba
-                            oos.writeDouble(saldo);
                         }
+
+
+                        //Recogemos el saldo de esa cuenta y se lo enviamos de vuelta
+                        double saldo = AccesoInfo.obtenerSaldoCuenta(cuenta); //10000.00;//Dato de prueba
+                        oos.writeDouble(saldo);
                         break;
                     case 2:
                         boolean correcto2 = false;

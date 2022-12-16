@@ -53,13 +53,47 @@ public class Cliente {
 
             System.out.println("Bienvenido, dispones de una cuenta?(Y/N) en caso negativo, pasaremos al registro");
             boolean cuentaExiste = AccesoInfo.yesNo();
-            if(cuentaExiste){
-                AccesoInfo.iniciarSesion();
-            }else{
+            oos.writeObject(cuentaExiste);
+            if(cuentaExiste){//Inicio Sesion
+                boolean correcto = false;
+                while(!correcto) {
+                    System.out.println("Por favor, introduce los datos requeridos para el inicio de sesion.");
+                    Scanner sc = new Scanner(System.in);
+                    System.out.println("Introduce el nombre de usuario que te corresponde");
+                    String user = sc.nextLine();
+                    oos.writeObject(user);
+                    byte[] pass = AccesoInfo.pedirDatoYHashear("Introduce tu contraseña");
+                    oos.writeObject(pass);
 
+                    boolean si = (boolean) ois.readObject();
+                    correcto = si;
+                    if(!correcto){
+                        System.out.println("El usuario y contraseña introducidos son incorrectos");
+                    }else{
+                        System.out.println("Inicio de sesion exitoso");
+                    }
+                }
+            }else{//Registro
+                System.out.println("Vamos a proceder con el registro");
+                String nombre,apellido,email,usuario;
+                int edad,numCuenta;
+                byte[] pass;
 
+                Scanner sc = new Scanner(System.in);
+                System.out.println("Introduce tu nombre(max 50char)");
+                nombre = AccesoInfo.obtenerStringCompleto(sc.nextLine(),50);
+                System.out.println("Introduce tus apellidos(max 50char)");
+                apellido = AccesoInfo.obtenerStringCompleto(sc.nextLine(),50);
+                edad = AccesoInfo.pedirInt("Introduce tu edad");
+                email = AccesoInfo.pedirCorreo();
+                System.out.println("Introduce el nombre de usuario que quieras utilizar(max 20char)");
+                usuario = AccesoInfo.obtenerStringCompleto(sc.nextLine(),20);
+                pass = AccesoInfo.pedirDatoYHashear("Introduce la contraseña");
 
+                numCuenta = AccesoInfo.pedirInt("Por ultimo, introduce el numero de cuenta que deseas usar");
+                oos.writeObject(new Usuario(nombre,apellido,edad,email,usuario,pass,numCuenta));
                 //ademas del registro, tiene que aceptar unas credenciales firmadas por el servidor
+                //Aqui va la aceptacion de las credenciales
             }
 
             /*
@@ -82,11 +116,11 @@ public class Cliente {
                             boolean correcto = false;
                             while(!correcto) {
                                 String numCuenta = getCuenta(false);
-                                oos.writeObject(cifrarMensaje("RSA",numCuenta,pkServidor));//Esto tiene que ir cifrado
+                                oos.writeObject(cifrarMensaje("RSA",numCuenta,pkServidor));
                                 boolean ok = ois.readBoolean();
                                 System.out.println(ok);
                                 if(!ok){
-                                    System.out.println("Ese numero de cuenta no te corresponde");
+                                    System.out.println("Esa cuenta no existe");
                                 }else{
                                     System.out.println("funciona");
                                     correcto = true;
