@@ -18,6 +18,8 @@ public class HiloServidor extends Thread {
     @Override
     public void run() {
 
+        System.setProperty("javax.net.ssl.keyStore","certificado/AlmacenSSL.jks");
+        System.setProperty("javax.net.ssl.keyStorePassword","12345Abcde");
 
         ObjectOutputStream oos;
         ObjectInputStream ois;
@@ -53,9 +55,11 @@ public class HiloServidor extends Thread {
                 }
             }else{
                 Usuario user = (Usuario)ois.readObject();
-                //Aqui hay que hacer la aceptacion del certificado
                 AccesoInfo.insertarUsuario(user);
-                double saldoInicial = ois.readDouble();
+                System.out.println("Se ha recibido un Usuario Nuevo");
+                oos.writeObject(true);
+                double saldoInicial = (double) ois.readObject();
+                System.out.println("Se ha recibido el Saldo de ese usuario");
                 AccesoInfo.crearCuenta(user.getNumCuenta(),10000);
             }
 
@@ -70,55 +74,86 @@ public class HiloServidor extends Thread {
             while(!textoCliente.equalsIgnoreCase("Salir")){
                 oos.writeObject(textoMenuPrincipal());
                 String operacion = ois.readObject().toString();
+                textoCliente = operacion;
                 switch(Integer.parseInt(operacion)){
                     case 1:
                         boolean correcto = false;
                         String cuenta = "";
                         while(!correcto){//Hacer la logica jaja
-                            System.out.println("hola");
+                            System.out.println("Se procede con una consulta de saldo");
                             byte[] cuentaCifrada =(byte[])ois.readObject();
                             System.out.println(cuentaCifrada);
-                            cuenta = descifrarMensaje("RSA",cuentaCifrada,pvkServidor);
+                            cuenta = AccesoInfo.descifrarMensaje("RSA",cuentaCifrada,pvkServidor);
                             //Comprobacion de que la cuenta cifrada sea la correcta
                             System.out.println(cuenta);
                             if(AccesoInfo.cuentaExiste(cuenta)) {//Comprobar que la cuenta exista
                                 correcto = true;
-                                oos.writeBoolean(true);
+                                oos.writeObject(true);
                             }else{
-                                oos.writeBoolean(false);
+                                oos.writeObject(false);
                             }
                         }
 
 
                         //Recogemos el saldo de esa cuenta y se lo enviamos de vuelta
-                        double saldo = AccesoInfo.obtenerSaldoCuenta(cuenta); //10000.00;//Dato de prueba
+                        double saldo = AccesoInfo.obtenerSaldoCuenta(cuenta);
                         oos.writeDouble(saldo);
                         break;
                     case 2:
+
+                        byte[] cuentaPropiaC;
+                        String cuentaPropia = "";
+                        byte[] cuentaAjenaC;
+                        String cuentaAjena = "";
+
                         boolean correcto2 = false;
                         while(!correcto2) {//Hacer la logica jeje
-                            byte[] cuentaPropiaC = (byte[]) ois.readObject();
-                            String cuentaPropia = descifrarMensaje("RSA", cuentaPropiaC, pvkServidor);
+                            cuentaPropiaC = (byte[]) ois.readObject();
+                            cuentaPropia = AccesoInfo.descifrarMensaje("RSA", cuentaPropiaC, pvkServidor);
 
-                            //Comprobacion de que la cuenta es correcta
                             oos.writeBoolean(true);
+                            correcto2 = (boolean) ois.readObject();
+                        }
+
+                        boolean correcto3 = false;
+                        while(!correcto3) {
                             //Cuenta Ajena
-                            byte[] cuentaAjenaC = (byte[]) ois.readObject();
-                            String cuentaAjena = descifrarMensaje("RSA" , cuentaAjenaC, pvkServidor);
+                            cuentaAjenaC = (byte[]) ois.readObject();
+                            cuentaAjena = AccesoInfo.descifrarMensaje("RSA", cuentaAjenaC, pvkServidor);
                             //Comprobacion de que la cuenta existe
                             oos.writeBoolean(true);
+                            correcto3 = (boolean) ois.readObject();
+                        }
 
+                        boolean correcto4 = false;
+                        while(!correcto4){
                             //Nos llega el dinero
                             double dinero = ois.readDouble();
 
-                            //Comprobamos bien todito
-                            oos.writeBoolean(true);
+                            AccesoInfo.cambiarValorCuenta(cuentaPropia,-dinero);
+                            AccesoInfo.cambiarValorCuenta(cuentaAjena,dinero);
 
+                            //Apartado doble autenticacion
+                            int codigo = AccesoInfo.generarCodigo();
+                            byte[] codigoCifrado = AccesoInfo.cifrarMensaje("RSA",codigo +"",pkCliente);
+                            oos.writeObject(codigoCifrado);
+                            byte[] codigoCliente = (byte[]) ois.readObject();
+                            String codigoClienteDes = AccesoInfo.descifrarMensaje("RSA",codigoCliente,pvkServidor);
+                            if(Integer.parseInt(codigoClienteDes) == codigo){
+                                oos.writeObject(true);
+                                correcto4 = true;
+                            }else{
+                                oos.writeObject(false);
+                            }
 
                         }
+                        oos.writeObject(new String("Se ha transferido el dinero"));
+
                         break;
+                        }
+
                 }
-            }
+
             /*
             Termina logica de operaciones
              */
@@ -173,21 +208,9 @@ public class HiloServidor extends Thread {
         return sk;
     }
 
-    public static String descifrarMensaje(String algoritmo, byte[] mensaje, Key key) throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException {
-        Cipher cp = Cipher.getInstance(algoritmo);
-        cp.init(Cipher.DECRYPT_MODE, key);
-        String msgDes = new String(cp.doFinal(mensaje));
 
-        return msgDes;
-    }
 
-    public static byte[] cifrarMensaje(String algoritmo, String mensaje, Key key) throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException {
-        Cipher cp = Cipher.getInstance(algoritmo);
-        cp.init(Cipher.ENCRYPT_MODE, key);
-        byte[] msgCF = cp.doFinal(mensaje.getBytes());
 
-        return msgCF;
-    }
 
     public static String textoMenuPrincipal(){
         return "Bienvenido, que deseas hacer?:\n" +

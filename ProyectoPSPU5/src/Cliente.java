@@ -18,6 +18,10 @@ public class Cliente {
     final static int puerto = 6790;
 
     public static void main(String[] args) {
+
+        System.setProperty("javax.net.ssl.trustStore", "certCliente/UsuarioAlmacenSSL");
+        System.setProperty("javax.net.ssl.trustStorePassword", "12345Abcde");
+
         //Conectar con el servidor
         Socket socket;
         ObjectOutputStream oos;
@@ -28,6 +32,8 @@ public class Cliente {
 
         try {
             socket = new Socket("localhost", puerto);
+
+
 
 
             oos = new ObjectOutputStream(socket.getOutputStream());
@@ -92,8 +98,10 @@ public class Cliente {
 
                 numCuenta = AccesoInfo.pedirInt("Por ultimo, introduce el numero de cuenta que deseas usar");
                 oos.writeObject(new Usuario(nombre,apellido,edad,email,usuario,pass,numCuenta));
-                //ademas del registro, tiene que aceptar unas credenciales firmadas por el servidor
-                //Aqui va la aceptacion de las credenciales
+                ois.readObject();
+                System.out.println("Aaa");
+                oos.writeObject(AccesoInfo.pedirDouble("Introduce el saldo inicial de la cuenta"));
+
             }
 
             /*
@@ -106,9 +114,10 @@ public class Cliente {
             String textoServidor = "";
             Scanner sc = new Scanner(System.in);
             String respuesta = "";
-            while (!textoServidor.equalsIgnoreCase("desconexion")) {
+            while (!textoServidor.equalsIgnoreCase("Salir")) {
                 System.out.println(ois.readObject());
                 respuesta = sc.nextLine();
+                textoServidor = respuesta;
                 if (isInt(respuesta) && (Integer.parseInt(respuesta) >= 1 && Integer.parseInt(respuesta) <= 2)) {
                     oos.writeObject(respuesta);
                     switch (Integer.parseInt(respuesta)) {
@@ -116,8 +125,8 @@ public class Cliente {
                             boolean correcto = false;
                             while(!correcto) {
                                 String numCuenta = getCuenta(false);
-                                oos.writeObject(cifrarMensaje("RSA",numCuenta,pkServidor));
-                                boolean ok = ois.readBoolean();
+                                oos.writeObject(AccesoInfo.cifrarMensaje("RSA",numCuenta,pkServidor));
+                                boolean ok = (boolean) ois.readObject();
                                 System.out.println(ok);
                                 if(!ok){
                                     System.out.println("Esa cuenta no existe");
@@ -136,42 +145,50 @@ public class Cliente {
                             boolean correcto2 = false;
                             while(!correcto2){
                                 String numCuenta = getCuenta(false);//Pedimos cuenta propia
-                                oos.writeObject(cifrarMensaje("RSA", numCuenta, pkServidor));
+                                oos.writeObject(AccesoInfo.cifrarMensaje("RSA", numCuenta, pkServidor));
                                 boolean ok = ois.readBoolean();
                                 if(!ok){
                                     System.out.println("Ese numero de cuenta no te corresponde");
+                                    oos.writeObject(false);
                                 }else{
                                     correcto2 = true;
+                                    oos.writeObject(true);
                                 }
                             }
                             boolean correcto3 = false;
                             while(!correcto3) {//Pedimos cuenta ajena
                                 String cuentaEx = getCuenta(true);
-                                oos.writeObject(cifrarMensaje("RSA", cuentaEx,pkServidor));
+                                oos.writeObject(AccesoInfo.cifrarMensaje("RSA", cuentaEx,pkServidor));
                                 boolean ok = ois.readBoolean();
                                 if(!ok){
                                     System.out.println("Ese numero de cuenta no existe");
+                                    oos.writeObject(false);
                                 }else{
                                     correcto3 = true;
+                                    oos.writeObject(true);
                                 }
                             }
                             boolean correcto4 = false;//Cuantas variables iguales voy a crear? no lo se, soy un dios generoso.
                             while(!correcto4){//Pedimos dinero
                                 double dinero = cantidadDinero();
                                 oos.writeDouble(dinero);
-                                boolean ok = ois.readBoolean();//Se hacen comprobaciones en la parte de servidor
-                                if(!ok){
-                                    System.out.println(ois.readObject());//Mensaje de error devuelto por el servidor
-                                    /*
-                                    Solo puede haber 2 mensajes de error
-                                        1 - No queda dinero en la cuenta
-                                        2 - Error desconocido
-                                     */
-                                    correcto = false;
+                                //Apartado doble autenticacion
+                                byte[] codigoC = (byte[]) ois.readObject();
+                                String a = AccesoInfo.descifrarMensaje("RSA",codigoC,pvkCliente);
+                                System.out.println(codigoC);
+                                AccesoInfo.pedirInt("Introduce el codigo mostrado en pantalla");
+                                int p = Integer.parseInt(sc.nextLine());
+
+                                byte[] codigoCC =  AccesoInfo.cifrarMensaje("RSA",p + "",pkServidor);
+                                oos.writeObject(codigoCC);
+                                boolean ok = (boolean) ois.readObject();
+                                if(ok){
+                                    correcto4 = true;
                                 }else{
-                                    correcto = true;
+                                    System.out.println("Los codigos no coinciden");
                                 }
                             }
+                            System.out.println(ois.readObject());
                             System.out.println("La transferencia se ha efectuado exitosamente");//A esto igual ponerle otra comprobacion jaja
                             break;
                     }
@@ -276,48 +293,6 @@ public class Cliente {
         return par;
     }
 
-    /**
-     * Descifra un mensaje suministrado, Tambien requiere de algoritmo y clave. Asegurarse de utilizar los datos correctos,
-     * es decir, el algorimo con el que se Cifró, y la clave correspondiente
-     * @param algoritmo el algoritmo con el que se quiere descifrar el texto, debe ser el mismo que el de cifrado
-     * @param mensaje el mensaje a descifrar
-     * @param key la clave que se usará para descifrar.
-     * @return
-     * @throws NoSuchPaddingException
-     * @throws NoSuchAlgorithmException
-     * @throws InvalidKeyException
-     * @throws IllegalBlockSizeException
-     * @throws BadPaddingException
-     */
-    public static String descifrarMensaje(String algoritmo, String mensaje, Key key) throws
-            NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException {
-        Cipher cp = Cipher.getInstance(algoritmo);
-        cp.init(Cipher.DECRYPT_MODE, key);
-        String msgDes = new String(cp.doFinal(mensaje.getBytes()));
-
-        return msgDes;
-    }
-
-    /**
-     * Cifra el mensaje proporcionado, Tambien requiere de algoritmo y clave. El algoritmo utilizado aqui, debe ser el mismo que para descifrar
-     * @param algoritmo el algoritmo con el que se quiere cifrar el texto
-     * @param mensaje mensaje a cifrar
-     * @param key la clave con la que se quiere firmar
-     * @return
-     * @throws NoSuchPaddingException
-     * @throws NoSuchAlgorithmException
-     * @throws InvalidKeyException
-     * @throws IllegalBlockSizeException
-     * @throws BadPaddingException
-     */
-    public static byte[] cifrarMensaje(String algoritmo, String mensaje, Key key) throws
-            NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException {
-        Cipher cp = Cipher.getInstance(algoritmo);
-        cp.init(Cipher.ENCRYPT_MODE, key);
-        byte[] msgCF = cp.doFinal(mensaje.getBytes());
-
-        return msgCF;
-    }
 
     public static boolean isInt(String check) {
         try {

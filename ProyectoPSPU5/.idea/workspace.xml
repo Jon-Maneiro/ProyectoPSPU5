@@ -31,7 +31,8 @@
     "RunOnceActivity.OpenProjectViewOnStart": "true",
     "RunOnceActivity.ShowReadmeOnStart": "true",
     "WebServerToolWindowFactoryState": "false",
-    "last_opened_file_path": "E:/Proyectos/DAM/Java/EjerciciosResueltosPSP5U/Ejercredenciales"
+    "last_opened_file_path": "E:/Proyectos/DAM/Java/EjerciciosResueltosPSP5U/ClienteServidorAsimetrico",
+    "vue.rearranger.settings.migration": "true"
   }
 }]]></component>
   <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
@@ -47,6 +48,7 @@
       <workItem from="1669829820388" duration="10231000" />
       <workItem from="1670960124791" duration="693000" />
       <workItem from="1671039423313" duration="7890000" />
+      <workItem from="1671525543865" duration="7670000" />
     </task>
     <servers />
   </component>

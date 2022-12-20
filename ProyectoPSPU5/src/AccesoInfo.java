@@ -1,4 +1,10 @@
+import javax.crypto.BadPaddingException;
+import javax.crypto.Cipher;
+import javax.crypto.IllegalBlockSizeException;
+import javax.crypto.NoSuchPaddingException;
 import java.io.*;
+import java.security.InvalidKeyException;
+import java.security.Key;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Random;
@@ -212,7 +218,7 @@ public class AccesoInfo {
      * @return true/false
      */
     public static boolean cuentaExiste(String numCuenta){
-        String cuenta = "/cuentas/Cuenta"+numCuenta+".dat";
+        String cuenta = "cuentas/Cuenta"+numCuenta+".dat";
         File file = new File(cuenta);
         if(file.exists()){
             return true;
@@ -222,7 +228,7 @@ public class AccesoInfo {
     }
 
     public static void crearCuenta(int numCuenta, double saldoInicial) throws IOException {
-        String cuenta = "/cuentas/Cuenta"+numCuenta+".dat";
+        String cuenta = "cuentas/Cuenta"+numCuenta+".dat";
         File file = new File(cuenta);
         RandomAccessFile fichero = new RandomAccessFile(file,"rw");
         fichero.seek(0);
@@ -237,7 +243,7 @@ public class AccesoInfo {
      * @throws IOException
      */
     public static double obtenerSaldoCuenta(String numCuenta) throws IOException {
-        String cuenta = "/cuentas/Cuenta"+numCuenta+".dat";
+        String cuenta = "cuentas/Cuenta"+numCuenta+".dat";
         File file = new File(cuenta);
         RandomAccessFile fichero = new RandomAccessFile(file,"r");
 
@@ -261,7 +267,7 @@ public class AccesoInfo {
      * @throws IOException
      */
     public static void cambiarValorCuenta(String numCuenta , double valor) throws IOException {
-        String cuenta = "/cuentas/Cuenta"+numCuenta+".dat";
+        String cuenta = "cuentas/Cuenta"+numCuenta+".dat";
         File file = new File(cuenta);
         RandomAccessFile fichero = new RandomAccessFile(file,"rw");
 
@@ -275,7 +281,7 @@ public class AccesoInfo {
 
         saldoNuevo = saldoActual + valor;
 
-        new FileOutputStream("/cuentas/"+cuenta).close();
+        new FileOutputStream("cuentas/"+cuenta).close();
 
         fichero = new RandomAccessFile(file,"rw");
         fichero.seek(0);
@@ -352,7 +358,7 @@ public class AccesoInfo {
                 usuario[x] = fichero.readChar();
             }
             for(int y = 0; y<20;y++){
-                contrasenna[y] = fichero.readByte();
+                contrasenna[y] = (byte) fichero.read();
             }
             fichero.readInt();
             if(new String(usuario).equals(user) && compararHash(contrasenna,pass)){
@@ -365,6 +371,38 @@ public class AccesoInfo {
 
 
         return existe;
+    }
+
+    /**
+     * Genera un codigo de 6 digitos aleatorios
+     * @return integer de 6 posiciones
+     */
+    public static int generarCodigo(){
+        int random = 0;
+        String temp = "";
+        for(int x = 0;x<6;x++){
+            Random rand = new Random();
+            int upper = 10;
+            temp = temp + rand.nextInt(upper);
+        }
+        random = Integer.parseInt(temp);
+        return random;
+    }
+
+    public static String descifrarMensaje(String algoritmo, byte[] mensaje, Key key) throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException {
+        Cipher cp = Cipher.getInstance(algoritmo);
+        cp.init(Cipher.DECRYPT_MODE, key);
+        String msgDes = new String(cp.doFinal(mensaje));
+
+        return msgDes;
+    }
+
+    public static byte[] cifrarMensaje(String algoritmo, String mensaje, Key key) throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException {
+        Cipher cp = Cipher.getInstance(algoritmo);
+        cp.init(Cipher.ENCRYPT_MODE, key);
+        byte[] msgCF = cp.doFinal(mensaje.getBytes());
+
+        return msgCF;
     }
 
 
