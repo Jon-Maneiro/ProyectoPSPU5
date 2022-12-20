@@ -96,8 +96,8 @@ public class HiloServidor extends Thread {
 
 
                         //Recogemos el saldo de esa cuenta y se lo enviamos de vuelta
-                        double saldo = AccesoInfo.obtenerSaldoCuenta(cuenta);
-                        oos.writeDouble(saldo);
+                        double saldo = AccesoInfo.obtenerSaldoCuenta(Integer.parseInt(cuenta));
+                        oos.writeObject(saldo);
                         break;
                     case 2:
 
@@ -111,7 +111,7 @@ public class HiloServidor extends Thread {
                             cuentaPropiaC = (byte[]) ois.readObject();
                             cuentaPropia = AccesoInfo.descifrarMensaje("RSA", cuentaPropiaC, pvkServidor);
 
-                            oos.writeBoolean(true);
+                            oos.writeObject(true);
                             correcto2 = (boolean) ois.readObject();
                         }
 
@@ -121,30 +121,35 @@ public class HiloServidor extends Thread {
                             cuentaAjenaC = (byte[]) ois.readObject();
                             cuentaAjena = AccesoInfo.descifrarMensaje("RSA", cuentaAjenaC, pvkServidor);
                             //Comprobacion de que la cuenta existe
-                            oos.writeBoolean(true);
+                            oos.writeObject(true);
                             correcto3 = (boolean) ois.readObject();
                         }
 
                         boolean correcto4 = false;
                         while(!correcto4){
                             //Nos llega el dinero
-                            double dinero = ois.readDouble();
 
-                            AccesoInfo.cambiarValorCuenta(cuentaPropia,-dinero);
-                            AccesoInfo.cambiarValorCuenta(cuentaAjena,dinero);
-
-                            //Apartado doble autenticacion
-                            int codigo = AccesoInfo.generarCodigo();
-                            byte[] codigoCifrado = AccesoInfo.cifrarMensaje("RSA",codigo +"",pkCliente);
+                            double dinero = (double) ois.readObject();
+                            String codigo = String.valueOf(AccesoInfo.generarCodigo());
+                            byte[] codigoCifrado = AccesoInfo.cifrarMensaje("RSA",codigo,pkCliente);
                             oos.writeObject(codigoCifrado);
+                            System.out.println("aaaaaaaaaa");
                             byte[] codigoCliente = (byte[]) ois.readObject();
                             String codigoClienteDes = AccesoInfo.descifrarMensaje("RSA",codigoCliente,pvkServidor);
-                            if(Integer.parseInt(codigoClienteDes) == codigo){
+                            System.out.println("cacaculo");
+                            if(codigoClienteDes.equals(codigo)){
+                                System.out.println("Putazorra");
                                 oos.writeObject(true);
                                 correcto4 = true;
+                                AccesoInfo.cambiarValorCuenta(cuentaPropia,-dinero);
+                                AccesoInfo.cambiarValorCuenta(cuentaAjena,dinero);
                             }else{
                                 oos.writeObject(false);
                             }
+
+
+                            //Apartado doble autenticacion
+
 
                         }
                         oos.writeObject(new String("Se ha transferido el dinero"));

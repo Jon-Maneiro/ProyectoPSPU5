@@ -136,7 +136,7 @@ public class Cliente {
                                 }
                             }
                             //Recibimos la informacion
-                            double saldo = ois.readDouble();
+                            double saldo = (double) ois.readObject();
                             System.out.println("----------------------------------");
                             System.out.println(saldo);
                             System.out.println("----------------------------------");
@@ -146,7 +146,7 @@ public class Cliente {
                             while(!correcto2){
                                 String numCuenta = getCuenta(false);//Pedimos cuenta propia
                                 oos.writeObject(AccesoInfo.cifrarMensaje("RSA", numCuenta, pkServidor));
-                                boolean ok = ois.readBoolean();
+                                boolean ok = (boolean) ois.readObject();
                                 if(!ok){
                                     System.out.println("Ese numero de cuenta no te corresponde");
                                     oos.writeObject(false);
@@ -159,7 +159,7 @@ public class Cliente {
                             while(!correcto3) {//Pedimos cuenta ajena
                                 String cuentaEx = getCuenta(true);
                                 oos.writeObject(AccesoInfo.cifrarMensaje("RSA", cuentaEx,pkServidor));
-                                boolean ok = ois.readBoolean();
+                                boolean ok = (boolean) ois.readObject();
                                 if(!ok){
                                     System.out.println("Ese numero de cuenta no existe");
                                     oos.writeObject(false);
@@ -171,15 +171,15 @@ public class Cliente {
                             boolean correcto4 = false;//Cuantas variables iguales voy a crear? no lo se, soy un dios generoso.
                             while(!correcto4){//Pedimos dinero
                                 double dinero = cantidadDinero();
-                                oos.writeDouble(dinero);
+                                oos.writeObject(dinero);
                                 //Apartado doble autenticacion
                                 byte[] codigoC = (byte[]) ois.readObject();
-                                String a = AccesoInfo.descifrarMensaje("RSA",codigoC,pvkCliente);
-                                System.out.println(codigoC);
+                                String codigoDescifrado = AccesoInfo.descifrarMensaje("RSA",codigoC,pvkCliente);
+                                System.out.println(codigoDescifrado);
                                 AccesoInfo.pedirInt("Introduce el codigo mostrado en pantalla");
-                                int p = Integer.parseInt(sc.nextLine());
+                                String p = sc.nextLine();
 
-                                byte[] codigoCC =  AccesoInfo.cifrarMensaje("RSA",p + "",pkServidor);
+                                byte[] codigoCC =  AccesoInfo.cifrarMensaje("RSA",p,pkServidor);
                                 oos.writeObject(codigoCC);
                                 boolean ok = (boolean) ois.readObject();
                                 if(ok){
@@ -193,7 +193,9 @@ public class Cliente {
                             break;
                     }
                 } else {
-                    System.out.println("Parece que lo que hayas introducido no es valido");
+                    if(!respuesta.equalsIgnoreCase("salir")){
+                        System.out.println("Parece que lo que hayas introducido no es valido");
+                    }
                 }
 
             }
@@ -237,7 +239,7 @@ public class Cliente {
         Scanner sc = new Scanner(System.in);
         boolean correcto = false;
         while(!correcto){
-            System.out.println("Introduce la cantidad que deseas transferir, por favor usa");
+            System.out.println("Introduce la cantidad que deseas transferir");
             String x = sc.nextLine();
             if(isDouble(x)){
                 correcto = true;

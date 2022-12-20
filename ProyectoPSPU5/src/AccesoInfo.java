@@ -260,7 +260,7 @@ public class AccesoInfo {
      * @return saldo de esa cuenta
      * @throws IOException
      */
-    public static double obtenerSaldoCuenta(String numCuenta) throws IOException {
+    public static double obtenerSaldoCuenta(int numCuenta) throws IOException {
         String cuenta = "cuentas/Cuenta"+numCuenta+".dat";
         File file = new File(cuenta);
         RandomAccessFile fichero = new RandomAccessFile(file,"r");
@@ -299,7 +299,7 @@ public class AccesoInfo {
 
         saldoNuevo = saldoActual + valor;
 
-        new FileOutputStream("cuentas/"+cuenta).close();
+        new FileOutputStream(cuenta).close();
 
         fichero = new RandomAccessFile(file,"rw");
         fichero.seek(0);
@@ -373,22 +373,30 @@ public class AccesoInfo {
 
         boolean correcto = false;
         while(fichero.getFilePointer()<longitud && !correcto){
-            fichero.seek(fichero.getFilePointer()+304);
+            for (int x = 0;x<50;x++){
+                fichero.readChar();
+            }
+            for (int x = 0;x<50;x++){
+                fichero.readChar();
+            }
+            fichero.readInt();
+            usuario = new char[20];
             for(int x = 0; x < 20; x++){
                 usuario[x] = fichero.readChar();
             }
+            contrasenna = new char[64];
             for(int y = 0; y<64;y++){
                 contrasenna[y] = fichero.readChar();
             }
             fichero.readInt();
-            if(new String(usuario).equals(user) && compararHash(new String(contrasenna),pass)){
+            if(new String(usuario).equals(obtenerStringCompleto(user,20)) && compararHash(new String(contrasenna),pass)){
                 correcto = true;
                 existe = true;
-            }else{
-                System.out.println("Los datos son incorrectos");
             }
         }
-
+        if(!existe){
+            System.out.println("Los datos son incorrectos");
+        }
 
         return existe;
     }

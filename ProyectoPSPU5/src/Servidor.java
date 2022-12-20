@@ -31,6 +31,7 @@ public class Servidor {
                 throw new RuntimeException(e);
             }
             HiloServidor hilo = new HiloServidor(c);
+            System.out.println("Se ha conectado un nuevo usuario");
             hilo.start();
         }
 
