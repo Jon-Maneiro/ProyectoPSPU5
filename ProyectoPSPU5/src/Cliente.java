@@ -68,7 +68,7 @@ public class Cliente {
                     System.out.println("Introduce el nombre de usuario que te corresponde");
                     String user = sc.nextLine();
                     oos.writeObject(user);
-                    byte[] pass = AccesoInfo.pedirDatoYHashear("Introduce tu contraseña");
+                    String pass = AccesoInfo.pedirDatoYHashear("Introduce tu contraseña");
                     oos.writeObject(pass);
 
                     boolean si = (boolean) ois.readObject();
@@ -83,7 +83,7 @@ public class Cliente {
                 System.out.println("Vamos a proceder con el registro");
                 String nombre,apellido,email,usuario;
                 int edad,numCuenta;
-                byte[] pass;
+                String pass;
 
                 Scanner sc = new Scanner(System.in);
                 System.out.println("Introduce tu nombre(max 50char)");

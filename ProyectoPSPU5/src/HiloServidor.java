@@ -48,7 +48,7 @@ public class HiloServidor extends Thread {
                 boolean correcto = false;
                 while(!correcto) {
                     String user = (String) ois.readObject();
-                    byte[] pass = (byte[]) ois.readObject();
+                    String pass = (String) ois.readObject();
                     boolean x = AccesoInfo.checkUsuario(user, pass);
                     correcto = x;
                     oos.writeObject(x);

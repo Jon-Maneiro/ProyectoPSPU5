@@ -7,6 +7,7 @@ import java.security.InvalidKeyException;
 import java.security.Key;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.Formatter;
 import java.util.Random;
 import java.util.Scanner;
 import java.util.regex.Matcher;
@@ -171,10 +172,10 @@ public class AccesoInfo {
      * @param mensaje mensaje que se quiera mostrar al usuario
      * @return dato introducido por pantalla resumido/hasheado
      */
-    public static byte[] pedirDatoYHashear(String mensaje) throws UnsupportedEncodingException, NoSuchAlgorithmException {
+    public static String pedirDatoYHashear(String mensaje) throws UnsupportedEncodingException, NoSuchAlgorithmException {
         Scanner sc = new Scanner(System.in);
         System.out.println(mensaje);
-        byte[] valor = getDigest(sc.nextLine().getBytes(ENCODING_TYPE));
+        String valor = getDigest(sc.nextLine().getBytes(ENCODING_TYPE));
         return valor;
     }
 
@@ -188,14 +189,29 @@ public class AccesoInfo {
      * @return array de Bytes con mensaje Hasehado
      * @throws NoSuchAlgorithmException
      */
-    public static byte[] getDigest(byte[] mensaje) throws NoSuchAlgorithmException {
+    public static String getDigest(byte[] mensaje) throws NoSuchAlgorithmException {
         byte[] resumen = null;
         MessageDigest alg = MessageDigest.getInstance(algoritmo);
         alg.reset();
         alg.update(mensaje);
         resumen = alg.digest();
         //System.out.println(resumen);//Solo para comprobaciones
-        return resumen;
+        return toHex(resumen);
+    }
+
+    /**
+     * Convierte un hash a hexadecimal
+     * @param data el hash a convertir
+     * @return String conteniendo el hash convertido a hexadecimal
+     */
+    public static String toHex(byte[] data){
+        StringBuilder sb = new StringBuilder(data.length * 2);
+        try(Formatter formatter = new Formatter(sb)){
+            for(byte b : data){
+                formatter.format("%02x",b);
+            }
+        }
+        return sb.toString();
     }
 
     /**
@@ -204,11 +220,13 @@ public class AccesoInfo {
      * @param res2 Otro de los resumenes
      * @return true/false
      */
-    public static boolean compararHash(byte[] res1, byte[] res2) throws NoSuchAlgorithmException {
+    public static boolean compararHash(String res1, String res2) throws NoSuchAlgorithmException {
         boolean correcto;
-        MessageDigest alg = MessageDigest.getInstance(algoritmo);
-        alg.reset();
-        correcto = alg.isEqual(res1,res2);
+        if(res1.equals(res2) || res2.equals(res1)){
+            correcto = true;
+        }else{
+            correcto = false;
+        }
         return correcto;
     }
 
@@ -298,17 +316,18 @@ public class AccesoInfo {
         File file = new File("Usuarios.dat");
         RandomAccessFile fichero = new RandomAccessFile(file,"rw");
 
-        /*
-        Nombre 50 chars - 100Bytes
-        Apellido 50 chars - 100Bytes
-        edad int - 4Bytes
-        email 50chars - 100Bytes
-        usuario 20 chars - 40Bytes
-        contrasenna 20Bytes
-        numCuenta int 4Bytes
+ /*
+    Nombre 50 chars - 100Bytes
+    Apellido 50 chars - 100Bytes
+    edad int - 4Bytes
+    email 50chars - 100Bytes
+    usuario 20 chars - 40Bytes
+    contrasenna 64chars 128Bytes
+    numCuenta int 4Bytes
 
-        Total = 368Bytes
-       */
+    Total = 476Bytes
+
+ */
 
         long longitud = fichero.length();
         fichero.seek(longitud);
@@ -317,7 +336,7 @@ public class AccesoInfo {
         fichero.writeChars(obtenerStringCompleto(user.getApellido(),50));
         fichero.writeInt(user.getEdad());
         fichero.writeChars(obtenerStringCompleto(user.getUsuario(),20));
-        fichero.write(user.getContrasenna());
+        fichero.writeChars(obtenerStringCompleto(user.getContrasenna(), 64));
         fichero.writeInt(user.getNumCuenta());
 
         fichero.close();
@@ -330,20 +349,21 @@ public class AccesoInfo {
      * @param pass
      * @return
      */
-    public static boolean checkUsuario(String user, byte[] pass) throws IOException, NoSuchAlgorithmException {
-        /*
-        Nombre 50 chars - 100Bytes
-        Apellido 50 chars - 100Bytes
-        edad int - 4Bytes
-        email 50chars - 100Bytes
-        usuario 20 chars - 40Bytes
-        contrasenna 20Bytes
-        numCuenta int 4Bytes
+    public static boolean checkUsuario(String user, String pass) throws IOException, NoSuchAlgorithmException {
+/*
+    Nombre 50 chars - 100Bytes
+    Apellido 50 chars - 100Bytes
+    edad int - 4Bytes
+    email 50chars - 100Bytes
+    usuario 20 chars - 40Bytes
+    contrasenna 64chars 128Bytes
+    numCuenta int 4Bytes
 
-        Total = 368Bytes
-       */
+    Total = 476Bytes
+
+ */
         char[] usuario = new char[20];
-        byte[] contrasenna = new byte[20];
+        char[] contrasenna = new char[64];
         boolean existe = false;
 
         File file = new File("Usuarios.dat");
@@ -357,11 +377,11 @@ public class AccesoInfo {
             for(int x = 0; x < 20; x++){
                 usuario[x] = fichero.readChar();
             }
-            for(int y = 0; y<20;y++){
-                contrasenna[y] = (byte) fichero.read();
+            for(int y = 0; y<64;y++){
+                contrasenna[y] = fichero.readChar();
             }
             fichero.readInt();
-            if(new String(usuario).equals(user) && compararHash(contrasenna,pass)){
+            if(new String(usuario).equals(user) && compararHash(new String(contrasenna),pass)){
                 correcto = true;
                 existe = true;
             }else{
