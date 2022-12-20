@@ -195,7 +195,6 @@ public class AccesoInfo {
         alg.reset();
         alg.update(mensaje);
         resumen = alg.digest();
-        //System.out.println(resumen);//Solo para comprobaciones
         return toHex(resumen);
     }
 

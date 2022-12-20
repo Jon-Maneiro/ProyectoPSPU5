@@ -131,7 +131,6 @@ public class Cliente {
                                 if(!ok){
                                     System.out.println("Esa cuenta no existe");
                                 }else{
-                                    System.out.println("funciona");
                                     correcto = true;
                                 }
                             }
@@ -176,16 +175,14 @@ public class Cliente {
                                 byte[] codigoC = (byte[]) ois.readObject();
                                 String codigoDescifrado = AccesoInfo.descifrarMensaje("RSA",codigoC,pvkCliente);
                                 System.out.println(codigoDescifrado);
-                                AccesoInfo.pedirInt("Introduce el codigo mostrado en pantalla");
-                                String p = sc.nextLine();
-
-                                byte[] codigoCC =  AccesoInfo.cifrarMensaje("RSA",p,pkServidor);
-                                oos.writeObject(codigoCC);
-                                boolean ok = (boolean) ois.readObject();
-                                if(ok){
+                                System.out.println("Introduce el codigo mostrado por pantalla");
+                                String resp = sc.nextLine();
+                                if(resp.equals(codigoDescifrado)) {
                                     correcto4 = true;
+                                    oos.writeObject(true);
                                 }else{
                                     System.out.println("Los codigos no coinciden");
+                                    oos.writeObject(false);
                                 }
                             }
                             System.out.println(ois.readObject());

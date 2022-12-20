@@ -133,18 +133,13 @@ public class HiloServidor extends Thread {
                             String codigo = String.valueOf(AccesoInfo.generarCodigo());
                             byte[] codigoCifrado = AccesoInfo.cifrarMensaje("RSA",codigo,pkCliente);
                             oos.writeObject(codigoCifrado);
-                            System.out.println("aaaaaaaaaa");
-                            byte[] codigoCliente = (byte[]) ois.readObject();
-                            String codigoClienteDes = AccesoInfo.descifrarMensaje("RSA",codigoCliente,pvkServidor);
-                            System.out.println("cacaculo");
-                            if(codigoClienteDes.equals(codigo)){
-                                System.out.println("Putazorra");
-                                oos.writeObject(true);
+
+                            if((boolean)ois.readObject()){
                                 correcto4 = true;
                                 AccesoInfo.cambiarValorCuenta(cuentaPropia,-dinero);
                                 AccesoInfo.cambiarValorCuenta(cuentaAjena,dinero);
+
                             }else{
-                                oos.writeObject(false);
                             }
 
 
