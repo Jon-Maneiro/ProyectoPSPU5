@@ -17,6 +17,10 @@ public class Cliente {
      */
     final static int puerto = 6790;
 
+    /**
+     * Funcion de ejecucion principal de la clase Cliente
+     * @param args
+     */
     public static void main(String[] args) {
 
         System.setProperty("javax.net.ssl.trustStore", "certCliente/UsuarioAlmacenSSL");
@@ -39,8 +43,6 @@ public class Cliente {
             oos = new ObjectOutputStream(socket.getOutputStream());
             ois = new ObjectInputStream(socket.getInputStream());
 
-            //Habria que enviar la clave publica del cliente, y/o utilizar una clave simetrica
-            //Falta la logica de preguntas/respuestas
             KeyPair kp;
 
             kp = generarClaves();
@@ -118,7 +120,7 @@ public class Cliente {
                 System.out.println(ois.readObject());
                 respuesta = sc.nextLine();
                 textoServidor = respuesta;
-                if (isInt(respuesta) && (Integer.parseInt(respuesta) >= 1 && Integer.parseInt(respuesta) <= 2)) {
+                if (AccesoInfo.isInt(respuesta) && (Integer.parseInt(respuesta) >= 1 && Integer.parseInt(respuesta) <= 2)) {
                     oos.writeObject(respuesta);
                     switch (Integer.parseInt(respuesta)) {
                         case 1:
@@ -167,7 +169,7 @@ public class Cliente {
                                     oos.writeObject(true);
                                 }
                             }
-                            boolean correcto4 = false;//Cuantas variables iguales voy a crear? no lo se, soy un dios generoso.
+                            boolean correcto4 = false;
                             while(!correcto4){//Pedimos dinero
                                 double dinero = cantidadDinero();
                                 oos.writeObject(dinero);
@@ -186,7 +188,7 @@ public class Cliente {
                                 }
                             }
                             System.out.println(ois.readObject());
-                            System.out.println("La transferencia se ha efectuado exitosamente");//A esto igual ponerle otra comprobacion jaja
+                            System.out.println("La transferencia se ha efectuado exitosamente");
                             break;
                     }
                 } else {
@@ -238,7 +240,7 @@ public class Cliente {
         while(!correcto){
             System.out.println("Introduce la cantidad que deseas transferir");
             String x = sc.nextLine();
-            if(isDouble(x)){
+            if(AccesoInfo.isDouble(x)){
                 correcto = true;
                 dinero = convert(x);
             }else{
@@ -266,7 +268,7 @@ public class Cliente {
                 System.out.println("Por favor introduce tu numero de cuenta");
             }
             numCuenta = sc.nextLine();
-            if(isInt(numCuenta) && numCuenta.length() == 10){
+            if(AccesoInfo.isInt(numCuenta) && numCuenta.length() == 10){
                 correcto = true;
             }else{
                 correcto = false;
@@ -293,22 +295,6 @@ public class Cliente {
     }
 
 
-    public static boolean isInt(String check) {
-        try {
-            Integer.parseInt(check);
-            return true;
-        } catch (NumberFormatException e) {
-            return false;
-        }
-    }
-    public static boolean isDouble(String check) {
-        try {
-            Double.parseDouble(check);
-            return true;
-        } catch (NumberFormatException e) {
-            return false;
-        }
-    }
 
     /**
      * Formatea correctamente un Double desde un String la mayor parte de los casos. Hay algunas ocurrencias que no puede controlar y los datos devueltos serán ambiguos

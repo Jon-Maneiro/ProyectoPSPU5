@@ -11,10 +11,17 @@ public class HiloServidor extends Thread {
 
     Socket sock = new Socket();
 
-    public HiloServidor(Socket sock) {//Posibilidad de más parametros, como una referencia a la clase que accede a la info
+    /**
+     * Constructor de la clase HiloServidor
+     * @param sock el socket al que se ha conectado
+     */
+    public HiloServidor(Socket sock) {
         this.sock = sock;
     }
 
+    /**
+     * Metodo de ejecucion de la clase HiloServidor
+     */
     @Override
     public void run() {
 
@@ -53,6 +60,7 @@ public class HiloServidor extends Thread {
                     correcto = x;
                     oos.writeObject(x);
                 }
+                System.out.println("Inicio de sesion");
             }else{
                 Usuario user = (Usuario)ois.readObject();
                 AccesoInfo.insertarUsuario(user);
@@ -61,7 +69,9 @@ public class HiloServidor extends Thread {
                 double saldoInicial = (double) ois.readObject();
                 System.out.println("Se ha recibido el Saldo de ese usuario");
                 AccesoInfo.crearCuenta(user.getNumCuenta(),10000);
+                System.out.println("Registro");
             }
+
 
             /*
             Se termina el Inicio de Sesion
@@ -79,7 +89,7 @@ public class HiloServidor extends Thread {
                     case 1:
                         boolean correcto = false;
                         String cuenta = "";
-                        while(!correcto){//Hacer la logica jaja
+                        while(!correcto){
                             System.out.println("Se procede con una consulta de saldo");
                             byte[] cuentaCifrada =(byte[])ois.readObject();
                             System.out.println(cuentaCifrada);
@@ -100,14 +110,14 @@ public class HiloServidor extends Thread {
                         oos.writeObject(saldo);
                         break;
                     case 2:
-
+                        System.out.println("Se procede con una Transferencia");
                         byte[] cuentaPropiaC;
                         String cuentaPropia = "";
                         byte[] cuentaAjenaC;
                         String cuentaAjena = "";
 
                         boolean correcto2 = false;
-                        while(!correcto2) {//Hacer la logica jeje
+                        while(!correcto2) {//Cuenta Propia
                             cuentaPropiaC = (byte[]) ois.readObject();
                             cuentaPropia = AccesoInfo.descifrarMensaje("RSA", cuentaPropiaC, pvkServidor);
 
@@ -141,11 +151,6 @@ public class HiloServidor extends Thread {
 
                             }else{
                             }
-
-
-                            //Apartado doble autenticacion
-
-
                         }
                         oos.writeObject(new String("Se ha transferido el dinero"));
 
@@ -183,6 +188,10 @@ public class HiloServidor extends Thread {
 
     }
 
+    /**
+     * Genera un par de Claves para ser usadas en cifrado y descifrado de datos
+      * @return
+     */
     public KeyPair generarClaves() {
         KeyPairGenerator keygen;
         try {
@@ -196,22 +205,10 @@ public class HiloServidor extends Thread {
         return par;
     }
 
-    public SecretKey generarClave() {
-        KeyGenerator keygen;
-        try {
-            keygen = KeyGenerator.getInstance("DES");
-        } catch (NoSuchAlgorithmException e) {
-            Logger.getLogger(HiloServidor.class.getName()).log(Level.SEVERE, null, e);
-            throw new RuntimeException(e);
-        }
-        SecretKey sk = keygen.generateKey();
-        return sk;
-    }
-
-
-
-
-
+    /**
+     * El texto del menu principal, se manda desde el servidor al cliente
+     * @return
+     */
     public static String textoMenuPrincipal(){
         return "Bienvenido, que deseas hacer?:\n" +
                 "(1) - Ver Saldo\n" +

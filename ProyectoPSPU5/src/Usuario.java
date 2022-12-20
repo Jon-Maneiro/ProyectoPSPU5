@@ -48,58 +48,114 @@ public class Usuario implements Serializable {
      */
     public Usuario(){};
 
+    /**
+     * Devuelve el nombre del Usuario
+     * @return
+     */
     public String getNombre() {
         return nombre;
     }
 
+    /**
+     * Asigna nombre de Usuario
+     * @param nombre el nombre a asignar
+     */
     public void setNombre(String nombre) {
         this.nombre = nombre;
     }
 
+    /**
+     * Devuelve el apellido del usuario
+     * @return
+     */
     public String getApellido() {
         return apellido;
     }
 
+    /**
+     * Asigna un apellido
+     * @param apellido el apellido a asignar
+     */
     public void setApellido(String apellido) {
         this.apellido = apellido;
     }
 
+    /**
+     * Devuelve la edad del usuario
+     * @return
+     */
     public int getEdad() {
         return edad;
     }
 
+    /**
+     * Asigna la edad del usuario
+     * @param edad la edad a asignar
+     */
     public void setEdad(int edad) {
         this.edad = edad;
     }
 
+    /**
+     * Obtiene el Email del usuario
+     * @return
+     */
     public String getEmail() {
         return email;
     }
 
+    /**
+     * Asigna el email del usuario
+     * @param email
+     */
     public void setEmail(String email) {
         this.email = email;
     }
 
+    /**
+     * Devuelve el Usuario del Usuario
+     * @return
+     */
     public String getUsuario() {
         return usuario;
     }
 
+    /**
+     * Asigna el Usuario al Usuario
+     * @param usuario
+     */
     public void setUsuario(String usuario) {
         this.usuario = usuario;
     }
 
+    /**
+     * Devuelve la contraseña del Usuario
+     * @return
+     */
     public String getContrasenna() {
         return contrasenna;
     }
 
+    /**
+     * Asigna la contraseña al Usuario
+     * @param contrasenna
+     */
     public void setContrasenna(String contrasenna) {
         this.contrasenna = contrasenna;
     }
 
+    /**
+     * Obtiene el numero de cuenta del Usuario
+     * @return
+     */
     public int getNumCuenta() {
         return numCuenta;
     }
 
+    /**
+     * Asigna el numero de cuenta del usuario
+     * @param numCuenta
+     */
     public void setNumCuenta(int numCuenta) {
         this.numCuenta = numCuenta;
     }

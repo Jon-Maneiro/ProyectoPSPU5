@@ -5,6 +5,10 @@ import java.net.Socket;
 public class Servidor {
     final static int puerto = 6790;
 
+    /**
+     * Ejecucion principal de la clase Servidor
+     * @param args
+     */
     public static void main(String[] args) {
 
         /**

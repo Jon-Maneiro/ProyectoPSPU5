@@ -17,11 +17,6 @@ public class AccesoInfo {
 
     private static final String algoritmo = "SHA-256";//Algoritmo de hasheo
     private static final String ENCODING_TYPE="UTF-8";
-/**
- * Tanto funciones genericas como funciones de acceso a los datos
- * Gestionar aqui tema ficheros y como organizarlo para no permitir a más de un usuario acceder al mismo fichero
- * a la vez, por temas de persistencia de datos.
- */
 
     /**
      * Metodo de utilidad para devolver el texto suministrado con la longitud requerida
@@ -68,20 +63,7 @@ public class AccesoInfo {
 
         return resp;
     }
-    /**
-     * Se comprueba si la variable suministrada se puede convertir a long
-     *
-     * @param check String a comprobar
-     * @return boolean yes/no
-     */
-    public static boolean isLong(String check) {
-        try {
-            Long.parseLong(check);
-            return true;
-        } catch (NumberFormatException e) {
-            return false;
-        }
-    }
+
     /**
      * Se comprueba si la variable suministrada se puede convertir a int
      *
@@ -96,11 +78,25 @@ public class AccesoInfo {
             return false;
         }
     }
+    /**
+     * Se comprueba si la variable suministrada se puede convertir a double
+     *
+     * @param check String a comprobar
+     * @return boolean yes/no
+     */
+    public static boolean isDouble(String check) {
+        try {
+            Double.parseDouble(check);
+            return true;
+        } catch (NumberFormatException e) {
+            return false;
+        }
+    }
 
     /**
      * Pide por pantalla un valor int y lo devuelve
      * @param mensaje mensaje que se quiere mostrar para dar informacion sobre el valor a introducir
-     * @return un Integro
+     * @return un Integer
      */
     public static int pedirInt(String mensaje){
         System.out.println(mensaje);
@@ -122,6 +118,11 @@ public class AccesoInfo {
 
     }
 
+    /**
+     * Pide por pantalla un valor Double y lo devuelve
+     * @param mensaje mensaje que se quiere mostrar para dar informacion sobre el valor a introducir
+     * @return un Double
+     */
     public static double pedirDouble(String mensaje){
         System.out.println(mensaje);
         Scanner sc = new Scanner(System.in);
@@ -244,6 +245,12 @@ public class AccesoInfo {
         }
     }
 
+    /**
+     * Crea un archivo de texto de cuenta bancaria según los datos suministrados
+     * @param numCuenta numero de cuenta que se desea usar
+     * @param saldoInicial el saldo con el que empieza la cuenta
+     * @throws IOException
+     */
     public static void crearCuenta(int numCuenta, double saldoInicial) throws IOException {
         String cuenta = "cuentas/Cuenta"+numCuenta+".dat";
         File file = new File(cuenta);
@@ -416,6 +423,18 @@ public class AccesoInfo {
         return random;
     }
 
+    /**
+     * Descifra un mensaje recibido como array de bytes, y lo devuelve como String. Necesita el nombre de un algoritmo y una Llave para funcionar
+     * @param algoritmo El nombre del algoritmo con el que se desea descifrar
+     * @param mensaje El mensaje a ser descifrado
+     * @param key la llave que se va a usar para descifrar
+     * @return un String con el contenido descifrado
+     * @throws NoSuchPaddingException
+     * @throws NoSuchAlgorithmException
+     * @throws InvalidKeyException
+     * @throws IllegalBlockSizeException
+     * @throws BadPaddingException
+     */
     public static String descifrarMensaje(String algoritmo, byte[] mensaje, Key key) throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException {
         Cipher cp = Cipher.getInstance(algoritmo);
         cp.init(Cipher.DECRYPT_MODE, key);
@@ -424,6 +443,18 @@ public class AccesoInfo {
         return msgDes;
     }
 
+    /**
+     * Cifra un mensaje  recibido como String, y lo devuelve como array de bytes. Necesita el nombre de un algoritmo y una Llave para funcionar
+     * @param algoritmo El nombre del algoritmo con el que se desea cifrar
+     * @param mensaje El mensaje a ser cifrado
+     * @param key la Llave que se va a usar para cifrar
+     * @return
+     * @throws NoSuchPaddingException
+     * @throws NoSuchAlgorithmException
+     * @throws InvalidKeyException
+     * @throws IllegalBlockSizeException
+     * @throws BadPaddingException
+     */
     public static byte[] cifrarMensaje(String algoritmo, String mensaje, Key key) throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException {
         Cipher cp = Cipher.getInstance(algoritmo);
         cp.init(Cipher.ENCRYPT_MODE, key);
