@@ -46,31 +46,48 @@ public class HiloServidor extends Thread {
             pvkServidor = kp.getPrivate();
 
             oos.writeObject(pkServidor);
+
+            //Firma Digital
+            System.out.println("Enviamos el mensaje para comprobar");
+            String mensaje = "Estas son las normas del banco";
+
+            oos.writeObject(mensaje);
+
+            Signature dsa = Signature.getInstance("SHA1WITHRSA");
+            dsa.initSign(pvkServidor);
+
+            dsa.update(mensaje.getBytes());
+            byte[] firma = dsa.sign();//Firmado
+            oos.writeObject(firma);
+
+            boolean aceptada = (boolean) ois.readObject();
+            if(aceptada) {
+
             /*
             Empieza la logica de Iniciar Sesion
              */
-            //-------------------------------------
-            boolean cuentaExiste = (boolean)ois.readObject();
-            if(cuentaExiste){
-                boolean correcto = false;
-                while(!correcto) {
-                    String user = (String) ois.readObject();
-                    String pass = (String) ois.readObject();
-                    boolean x = AccesoInfo.checkUsuario(user, pass);
-                    correcto = x;
-                    oos.writeObject(x);
+                //-------------------------------------
+                boolean cuentaExiste = (boolean) ois.readObject();
+                if (cuentaExiste) {
+                    boolean correcto = false;
+                    while (!correcto) {
+                        String user = (String) ois.readObject();
+                        String pass = (String) ois.readObject();
+                        boolean x = AccesoInfo.checkUsuario(user, pass);
+                        correcto = x;
+                        oos.writeObject(x);
+                    }
+                    System.out.println("Inicio de sesion");
+                } else {
+                    Usuario user = (Usuario) ois.readObject();
+                    AccesoInfo.insertarUsuario(user);
+                    System.out.println("Se ha recibido un Usuario Nuevo");
+                    oos.writeObject(true);
+                    double saldoInicial = (double) ois.readObject();
+                    System.out.println("Se ha recibido el Saldo de ese usuario");
+                    AccesoInfo.crearCuenta(user.getNumCuenta(), 10000);
+                    System.out.println("Registro");
                 }
-                System.out.println("Inicio de sesion");
-            }else{
-                Usuario user = (Usuario)ois.readObject();
-                AccesoInfo.insertarUsuario(user);
-                System.out.println("Se ha recibido un Usuario Nuevo");
-                oos.writeObject(true);
-                double saldoInicial = (double) ois.readObject();
-                System.out.println("Se ha recibido el Saldo de ese usuario");
-                AccesoInfo.crearCuenta(user.getNumCuenta(),10000);
-                System.out.println("Registro");
-            }
 
 
             /*
@@ -80,88 +97,92 @@ public class HiloServidor extends Thread {
             /*
             Empieza la logica del operaciones
              */
-            String textoCliente ="";
-            while(!textoCliente.equalsIgnoreCase("Salir")){
-                oos.writeObject(textoMenuPrincipal());
-                String operacion = ois.readObject().toString();
-                textoCliente = operacion;
-                switch(Integer.parseInt(operacion)){
-                    case 1:
-                        boolean correcto = false;
-                        String cuenta = "";
-                        while(!correcto){
-                            System.out.println("Se procede con una consulta de saldo");
-                            byte[] cuentaCifrada =(byte[])ois.readObject();
-                            System.out.println(cuentaCifrada);
-                            cuenta = AccesoInfo.descifrarMensaje("RSA",cuentaCifrada,pvkServidor);
-                            //Comprobacion de que la cuenta cifrada sea la correcta
-                            System.out.println(cuenta);
-                            if(AccesoInfo.cuentaExiste(cuenta)) {//Comprobar que la cuenta exista
-                                correcto = true;
+                String textoCliente = "";
+                while (!textoCliente.equalsIgnoreCase("Salir")) {
+                    oos.writeObject(textoMenuPrincipal());
+                    String operacion = ois.readObject().toString();
+                    textoCliente = operacion;
+                    switch (Integer.parseInt(operacion)) {
+                        case 1:
+                            boolean correcto = false;
+                            String cuenta = "";
+                            while (!correcto) {
+                                System.out.println("Se procede con una consulta de saldo");
+                                byte[] cuentaCifrada = (byte[]) ois.readObject();
+                                System.out.println(cuentaCifrada);
+                                cuenta = AccesoInfo.descifrarMensaje("RSA", cuentaCifrada, pvkServidor);
+                                //Comprobacion de que la cuenta cifrada sea la correcta
+                                System.out.println(cuenta);
+                                if (AccesoInfo.cuentaExiste(cuenta)) {//Comprobar que la cuenta exista
+                                    correcto = true;
+                                    oos.writeObject(true);
+                                } else {
+                                    oos.writeObject(false);
+                                }
+                            }
+
+
+                            //Recogemos el saldo de esa cuenta y se lo enviamos de vuelta
+                            double saldo = AccesoInfo.obtenerSaldoCuenta(Integer.parseInt(cuenta));
+                            oos.writeObject(saldo);
+                            break;
+                        case 2:
+                            System.out.println("Se procede con una Transferencia");
+                            byte[] cuentaPropiaC;
+                            String cuentaPropia = "";
+                            byte[] cuentaAjenaC;
+                            String cuentaAjena = "";
+
+                            boolean correcto2 = false;
+                            while (!correcto2) {//Cuenta Propia
+                                cuentaPropiaC = (byte[]) ois.readObject();
+                                cuentaPropia = AccesoInfo.descifrarMensaje("RSA", cuentaPropiaC, pvkServidor);
+
                                 oos.writeObject(true);
-                            }else{
-                                oos.writeObject(false);
+                                correcto2 = (boolean) ois.readObject();
                             }
-                        }
 
-
-                        //Recogemos el saldo de esa cuenta y se lo enviamos de vuelta
-                        double saldo = AccesoInfo.obtenerSaldoCuenta(Integer.parseInt(cuenta));
-                        oos.writeObject(saldo);
-                        break;
-                    case 2:
-                        System.out.println("Se procede con una Transferencia");
-                        byte[] cuentaPropiaC;
-                        String cuentaPropia = "";
-                        byte[] cuentaAjenaC;
-                        String cuentaAjena = "";
-
-                        boolean correcto2 = false;
-                        while(!correcto2) {//Cuenta Propia
-                            cuentaPropiaC = (byte[]) ois.readObject();
-                            cuentaPropia = AccesoInfo.descifrarMensaje("RSA", cuentaPropiaC, pvkServidor);
-
-                            oos.writeObject(true);
-                            correcto2 = (boolean) ois.readObject();
-                        }
-
-                        boolean correcto3 = false;
-                        while(!correcto3) {
-                            //Cuenta Ajena
-                            cuentaAjenaC = (byte[]) ois.readObject();
-                            cuentaAjena = AccesoInfo.descifrarMensaje("RSA", cuentaAjenaC, pvkServidor);
-                            //Comprobacion de que la cuenta existe
-                            oos.writeObject(true);
-                            correcto3 = (boolean) ois.readObject();
-                        }
-
-                        boolean correcto4 = false;
-                        while(!correcto4){
-                            //Nos llega el dinero
-
-                            double dinero = (double) ois.readObject();
-                            String codigo = String.valueOf(AccesoInfo.generarCodigo());
-                            byte[] codigoCifrado = AccesoInfo.cifrarMensaje("RSA",codigo,pkCliente);
-                            oos.writeObject(codigoCifrado);
-
-                            if((boolean)ois.readObject()){
-                                correcto4 = true;
-                                AccesoInfo.cambiarValorCuenta(cuentaPropia,-dinero);
-                                AccesoInfo.cambiarValorCuenta(cuentaAjena,dinero);
-
-                            }else{
+                            boolean correcto3 = false;
+                            while (!correcto3) {
+                                //Cuenta Ajena
+                                cuentaAjenaC = (byte[]) ois.readObject();
+                                cuentaAjena = AccesoInfo.descifrarMensaje("RSA", cuentaAjenaC, pvkServidor);
+                                //Comprobacion de que la cuenta existe
+                                oos.writeObject(true);
+                                correcto3 = (boolean) ois.readObject();
                             }
-                        }
-                        oos.writeObject(new String("Se ha transferido el dinero"));
 
-                        break;
-                        }
+                            boolean correcto4 = false;
+                            while (!correcto4) {
+                                //Nos llega el dinero
+
+                                double dinero = (double) ois.readObject();
+                                String codigo = String.valueOf(AccesoInfo.generarCodigo());
+                                byte[] codigoCifrado = AccesoInfo.cifrarMensaje("RSA", codigo, pkCliente);
+                                oos.writeObject(codigoCifrado);
+
+                                if ((boolean) ois.readObject()) {
+                                    correcto4 = true;
+                                    AccesoInfo.cambiarValorCuenta(cuentaPropia, -dinero);
+                                    AccesoInfo.cambiarValorCuenta(cuentaAjena, dinero);
+
+                                } else {
+                                }
+                            }
+                            oos.writeObject(new String("Se ha transferido el dinero"));
+
+                            break;
+                    }
 
                 }
 
             /*
             Termina logica de operaciones
              */
+            }
+            else{
+                System.out.println("El usuario no ha aceptado los terminos y condiciones");
+            }
 
         } catch (IOException e) {
             Logger.getLogger(HiloServidor.class.getName()).log(Level.SEVERE, null, e);
@@ -182,6 +203,9 @@ public class HiloServidor extends Thread {
             Logger.getLogger(HiloServidor.class.getName()).log(Level.SEVERE, null, e);
             throw new RuntimeException(e);
         } catch (InvalidKeyException e) {
+            Logger.getLogger(HiloServidor.class.getName()).log(Level.SEVERE, null, e);
+            throw new RuntimeException(e);
+        } catch (SignatureException e) {
             Logger.getLogger(HiloServidor.class.getName()).log(Level.SEVERE, null, e);
             throw new RuntimeException(e);
         }

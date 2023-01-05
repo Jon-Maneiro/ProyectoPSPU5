@@ -53,7 +53,26 @@ public class Cliente {
             oos.writeObject(pkCliente);
 
             pkServidor = (PublicKey) ois.readObject();
+            //Firma Digital
+            String mensaje =  ois.readObject().toString();
+            System.out.println("Mensaje = " + mensaje);
 
+            //Verificacion de la firma
+            Signature verificadadsa = Signature.getInstance("SHA1WITHRSA");
+            verificadadsa.initVerify(pkServidor);
+
+            verificadadsa.update(mensaje.getBytes());
+            byte[] firma = (byte[]) ois.readObject();
+            boolean check = verificadadsa.verify(firma);
+
+            if(check){
+                System.out.println("Aceptas las normas?");
+                boolean sino = AccesoInfo.yesNo();
+                oos.writeObject(sino);
+            }else{
+                System.out.println("Parece que la firma es falsa, cerrando comunicacion");
+                oos.writeObject(false);
+            }
 
             /*
             Logica de Inicio de Sesion
@@ -222,6 +241,9 @@ public class Cliente {
             Logger.getLogger(HiloServidor.class.getName()).log(Level.SEVERE, null, e);
             throw new RuntimeException(e);
         } catch (InvalidKeyException e) {
+            Logger.getLogger(HiloServidor.class.getName()).log(Level.SEVERE, null, e);
+            throw new RuntimeException(e);
+        } catch (SignatureException e) {
             Logger.getLogger(HiloServidor.class.getName()).log(Level.SEVERE, null, e);
             throw new RuntimeException(e);
         }
