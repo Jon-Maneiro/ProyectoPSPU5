@@ -28,6 +28,7 @@ public class HiloServidor extends Thread {
         System.setProperty("javax.net.ssl.keyStore","certificado/AlmacenSSL.jks");
         System.setProperty("javax.net.ssl.keyStorePassword","12345Abcde");
 
+        Usuario userActual = null;
         ObjectOutputStream oos;
         ObjectInputStream ois;
         PublicKey pkCliente;
@@ -35,6 +36,7 @@ public class HiloServidor extends Thread {
         PrivateKey pvkServidor;
         SecretKey sk;
         try {
+
             oos = new ObjectOutputStream(sock.getOutputStream());
             ois = new ObjectInputStream(sock.getInputStream());
 
@@ -44,6 +46,7 @@ public class HiloServidor extends Thread {
 
             pkServidor = kp.getPublic();
             pvkServidor = kp.getPrivate();
+
 
             oos.writeObject(pkServidor);
 
@@ -62,7 +65,6 @@ public class HiloServidor extends Thread {
 
             boolean aceptada = (boolean) ois.readObject();
             if(aceptada) {
-
             /*
             Empieza la logica de Iniciar Sesion
              */
@@ -73,14 +75,20 @@ public class HiloServidor extends Thread {
                     while (!correcto) {
                         String user = (String) ois.readObject();
                         String pass = (String) ois.readObject();
-                        boolean x = AccesoInfo.checkUsuario(user, pass);
-                        correcto = x;
-                        oos.writeObject(x);
+                        Usuario x = AccesoInfo.checkUsuario(user, pass);
+                        if(x != null) {
+                            correcto = true;
+                            oos.writeObject(correcto);
+                            userActual = x;
+                        }else{
+                            oos.writeObject(false);
+                        }
                     }
                     System.out.println("Inicio de sesion");
                 } else {
                     Usuario user = (Usuario) ois.readObject();
                     AccesoInfo.insertarUsuario(user);
+                    userActual = user;
                     System.out.println("Se ha recibido un Usuario Nuevo");
                     oos.writeObject(true);
                     double saldoInicial = (double) ois.readObject();
@@ -114,8 +122,13 @@ public class HiloServidor extends Thread {
                                 //Comprobacion de que la cuenta cifrada sea la correcta
                                 System.out.println(cuenta);
                                 if (AccesoInfo.cuentaExiste(cuenta)) {//Comprobar que la cuenta exista
-                                    correcto = true;
-                                    oos.writeObject(true);
+
+                                    if(userActual.getNumCuenta().equals(cuenta)){//Comprobamos el acceso a esa cuenta
+                                        oos.writeObject(true);
+                                        correcto = true;
+                                    }else{
+                                        oos.writeObject(false);
+                                    }
                                 } else {
                                     oos.writeObject(false);
                                 }
@@ -123,7 +136,7 @@ public class HiloServidor extends Thread {
 
 
                             //Recogemos el saldo de esa cuenta y se lo enviamos de vuelta
-                            double saldo = AccesoInfo.obtenerSaldoCuenta(Integer.parseInt(cuenta));
+                            double saldo = AccesoInfo.obtenerSaldoCuenta(cuenta);
                             oos.writeObject(saldo);
                             break;
                         case 2:
@@ -137,9 +150,14 @@ public class HiloServidor extends Thread {
                             while (!correcto2) {//Cuenta Propia
                                 cuentaPropiaC = (byte[]) ois.readObject();
                                 cuentaPropia = AccesoInfo.descifrarMensaje("RSA", cuentaPropiaC, pvkServidor);
+                                if(cuentaPropia.equals(userActual.getNumCuenta())){
+                                    oos.writeObject(true);
+                                    correcto2 = (boolean) ois.readObject();
+                                }else{
+                                    oos.writeObject(false);
+                                    correcto2 = false;
+                                }
 
-                                oos.writeObject(true);
-                                correcto2 = (boolean) ois.readObject();
                             }
 
                             boolean correcto3 = false;

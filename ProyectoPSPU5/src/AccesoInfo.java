@@ -231,6 +231,27 @@ public class AccesoInfo {
     }
 
     /**
+     * Pide por pantalla la cuenta que desea usar el usuario, de 10 caracteres
+     * de longitud
+     * @return el numero de cuenta
+     */
+    public static String pedirCuenta(String mensaje){
+        System.out.println(mensaje);
+        String cuenta = "";
+        Scanner sc = new Scanner(System.in);
+        boolean correcto = false;
+        while(!correcto){
+            cuenta = sc.nextLine();
+            if(cuenta.length() == 10){
+                correcto = true;
+            }else{
+                System.out.println("La cuenta debe de ser de 10 caracteres");
+            }
+        }
+        return cuenta;
+    }
+
+    /**
      * Recibe un numero de cuenta y comprueba que exista
      * @param numCuenta numero de cuenta que se quiere comprobar
      * @return true/false
@@ -251,7 +272,7 @@ public class AccesoInfo {
      * @param saldoInicial el saldo con el que empieza la cuenta
      * @throws IOException
      */
-    public static void crearCuenta(int numCuenta, double saldoInicial) throws IOException {
+    public static void crearCuenta(String numCuenta, double saldoInicial) throws IOException {
         String cuenta = "cuentas/Cuenta"+numCuenta+".dat";
         File file = new File(cuenta);
         RandomAccessFile fichero = new RandomAccessFile(file,"rw");
@@ -266,7 +287,7 @@ public class AccesoInfo {
      * @return saldo de esa cuenta
      * @throws IOException
      */
-    public static double obtenerSaldoCuenta(int numCuenta) throws IOException {
+    public static double obtenerSaldoCuenta(String numCuenta) throws IOException {
         String cuenta = "cuentas/Cuenta"+numCuenta+".dat";
         File file = new File(cuenta);
         RandomAccessFile fichero = new RandomAccessFile(file,"r");
@@ -322,16 +343,16 @@ public class AccesoInfo {
         File file = new File("Usuarios.dat");
         RandomAccessFile fichero = new RandomAccessFile(file,"rw");
 
- /*
+/*
     Nombre 50 chars - 100Bytes
     Apellido 50 chars - 100Bytes
     edad int - 4Bytes
     email 50chars - 100Bytes
     usuario 20 chars - 40Bytes
     contrasenna 64chars 128Bytes
-    numCuenta int 4Bytes
+    numCuenta 10 chars 20bytes
 
-    Total = 476Bytes
+    Total = 492Bytes
 
  */
 
@@ -341,9 +362,10 @@ public class AccesoInfo {
         fichero.writeChars(obtenerStringCompleto(user.getNombre(),50));
         fichero.writeChars(obtenerStringCompleto(user.getApellido(),50));
         fichero.writeInt(user.getEdad());
+        fichero.writeChars(obtenerStringCompleto(user.getEmail(),50));
         fichero.writeChars(obtenerStringCompleto(user.getUsuario(),20));
         fichero.writeChars(obtenerStringCompleto(user.getContrasenna(), 64));
-        fichero.writeInt(user.getNumCuenta());
+        fichero.writeChars(user.getNumCuenta());
 
         fichero.close();
 
@@ -355,7 +377,7 @@ public class AccesoInfo {
      * @param pass
      * @return
      */
-    public static boolean checkUsuario(String user, String pass) throws IOException, NoSuchAlgorithmException {
+    public static Usuario checkUsuario(String user, String pass) throws IOException, NoSuchAlgorithmException {
 /*
     Nombre 50 chars - 100Bytes
     Apellido 50 chars - 100Bytes
@@ -363,15 +385,20 @@ public class AccesoInfo {
     email 50chars - 100Bytes
     usuario 20 chars - 40Bytes
     contrasenna 64chars 128Bytes
-    numCuenta int 4Bytes
+    numCuenta 10 chars 20bytes
 
-    Total = 476Bytes
+    Total = 492Bytes
 
  */
+        char[] nombre = new char[50];
+        char[] apellido = new char[50];
+        int edad = 0;
+        char[] email = new char[50];
         char[] usuario = new char[20];
         char[] contrasenna = new char[64];
+        char[] numCuenta = new char[10];
         boolean existe = false;
-
+        Usuario vuelta = null;
         File file = new File("Usuarios.dat");
         RandomAccessFile fichero = new RandomAccessFile(file,"rw");
         long longitud = fichero.length();
@@ -380,31 +407,42 @@ public class AccesoInfo {
         boolean correcto = false;
         while(fichero.getFilePointer()<longitud && !correcto){
             for (int x = 0;x<50;x++){
-                fichero.readChar();
+                nombre[x] = fichero.readChar();
             }
             for (int x = 0;x<50;x++){
-                fichero.readChar();
+                apellido[x] = fichero.readChar();
             }
-            fichero.readInt();
-            usuario = new char[20];
+            edad = fichero.readInt();
+            for (int x = 0;x<50;x++){
+                email[x] = fichero.readChar();
+            }
             for(int x = 0; x < 20; x++){
                 usuario[x] = fichero.readChar();
             }
-            contrasenna = new char[64];
             for(int y = 0; y<64;y++){
                 contrasenna[y] = fichero.readChar();
             }
-            fichero.readInt();
+            for (int x = 0;x<10;x++){
+                numCuenta[x] = fichero.readChar();
+            }
             if(new String(usuario).equals(obtenerStringCompleto(user,20)) && compararHash(new String(contrasenna),pass)){
                 correcto = true;
                 existe = true;
+                String name,surname,correo,username,account;
+                name = new String(nombre);
+                surname = new String(apellido);
+                correo = new String(email);
+                username = new String(usuario);
+                account = new String(numCuenta);
+                vuelta = new Usuario(name,surname,edad,correo,username,contrasenna.toString(),account);
             }
+
         }
         if(!existe){
             System.out.println("Los datos son incorrectos");
         }
 
-        return existe;
+        return vuelta;
     }
 
     /**

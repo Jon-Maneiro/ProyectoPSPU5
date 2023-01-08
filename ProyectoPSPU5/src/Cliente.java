@@ -66,7 +66,7 @@ public class Cliente {
             boolean check = verificadadsa.verify(firma);
 
             if(check){
-                System.out.println("Aceptas las normas?");
+                System.out.println("Aceptas las normas?(Y/N)");
                 boolean sino = AccesoInfo.yesNo();
                 oos.writeObject(sino);
             }else{
@@ -102,8 +102,8 @@ public class Cliente {
                 }
             }else{//Registro
                 System.out.println("Vamos a proceder con el registro");
-                String nombre,apellido,email,usuario;
-                int edad,numCuenta;
+                String nombre,apellido,email,usuario,numCuenta;
+                int edad;
                 String pass;
 
                 Scanner sc = new Scanner(System.in);
@@ -117,10 +117,9 @@ public class Cliente {
                 usuario = AccesoInfo.obtenerStringCompleto(sc.nextLine(),20);
                 pass = AccesoInfo.pedirDatoYHashear("Introduce la contraseña");
 
-                numCuenta = AccesoInfo.pedirInt("Por ultimo, introduce el numero de cuenta que deseas usar");
+                numCuenta = AccesoInfo.pedirCuenta("Por ultimo, introduce el numero de cuenta que deseas usar(10caracteres)");
                 oos.writeObject(new Usuario(nombre,apellido,edad,email,usuario,pass,numCuenta));
                 ois.readObject();
-                System.out.println("Aaa");
                 oos.writeObject(AccesoInfo.pedirDouble("Introduce el saldo inicial de la cuenta"));
 
             }
@@ -290,7 +289,7 @@ public class Cliente {
                 System.out.println("Por favor introduce tu numero de cuenta");
             }
             numCuenta = sc.nextLine();
-            if(AccesoInfo.isInt(numCuenta) && numCuenta.length() == 10){
+            if(numCuenta.length() == 10){
                 correcto = true;
             }else{
                 correcto = false;

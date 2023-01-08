@@ -8,7 +8,7 @@ public class Usuario implements Serializable {
     private String usuario;// 20char
     private String contrasenna;//La contraseña se guarda hasheada, 20Bytes
 
-    private int numCuenta;//4Bytes//20 Digitos
+    private String numCuenta;//4Bytes//20 Digitos
 
 /*
     Nombre 50 chars - 100Bytes
@@ -17,9 +17,9 @@ public class Usuario implements Serializable {
     email 50chars - 100Bytes
     usuario 20 chars - 40Bytes
     contrasenna 64chars 128Bytes
-    numCuenta int 4Bytes
+    numCuenta 10 chars 20bytes
 
-    Total = 476Bytes
+    Total = 492Bytes
 
  */
 
@@ -33,7 +33,7 @@ public class Usuario implements Serializable {
      * @param contrasenna
      * @param numCuenta
      */
-    public Usuario(String nombre, String apellido, int edad, String email, String usuario, String contrasenna, int numCuenta) {
+    public Usuario(String nombre, String apellido, int edad, String email, String usuario, String contrasenna, String numCuenta) {
         this.nombre = nombre;
         this.apellido = apellido;
         this.edad = edad;
@@ -148,7 +148,7 @@ public class Usuario implements Serializable {
      * Obtiene el numero de cuenta del Usuario
      * @return
      */
-    public int getNumCuenta() {
+    public String getNumCuenta() {
         return numCuenta;
     }
 
@@ -156,7 +156,7 @@ public class Usuario implements Serializable {
      * Asigna el numero de cuenta del usuario
      * @param numCuenta
      */
-    public void setNumCuenta(int numCuenta) {
+    public void setNumCuenta(String numCuenta) {
         this.numCuenta = numCuenta;
     }
 }
